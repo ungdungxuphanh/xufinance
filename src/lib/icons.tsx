@@ -1,0 +1,80 @@
+import {
+  Banknote,
+  Briefcase,
+  Bus,
+  Car,
+  Coffee,
+  CreditCard,
+  Dumbbell,
+  Gamepad2,
+  Gift,
+  GraduationCap,
+  HeartPulse,
+  Home,
+  Landmark,
+  Laptop,
+  PawPrint,
+  PiggyBank,
+  Plane,
+  ReceiptText,
+  ShoppingBag,
+  ShoppingCart,
+  Smartphone,
+  Sparkles,
+  Tag,
+  TrendingUp,
+  UtensilsCrossed,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
+
+export const ICONS: Record<string, LucideIcon> = {
+  Tag,
+  Wallet,
+  Banknote,
+  Briefcase,
+  Gift,
+  TrendingUp,
+  PiggyBank,
+  Laptop,
+  UtensilsCrossed,
+  Coffee,
+  ShoppingBag,
+  ShoppingCart,
+  Car,
+  Bus,
+  Plane,
+  Home,
+  ReceiptText,
+  CreditCard,
+  Gamepad2,
+  HeartPulse,
+  Dumbbell,
+  GraduationCap,
+  PawPrint,
+  Sparkles,
+  Smartphone,
+  Landmark,
+};
+
+export const ICON_NAMES = Object.keys(ICONS);
+
+export function Icon({ name, className }: { name: string; className?: string }) {
+  const Cmp = ICONS[name] ?? Tag;
+  return <Cmp className={className} />;
+}
+
+export const PALETTE = [
+  "#22c55e",
+  "#14b8a6",
+  "#0ea5e9",
+  "#6366f1",
+  "#a855f7",
+  "#ec4899",
+  "#ef4444",
+  "#f97316",
+  "#eab308",
+  "#84cc16",
+  "#06b6d4",
+  "#64748b",
+];
