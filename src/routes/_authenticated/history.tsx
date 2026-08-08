@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { History, ArrowDownLeft, ArrowUpRight, Search, Pencil, Trash2 } from "lucide-react";
 import { formatVND } from "@/lib/money";
-import { useTransactions, useDeleteTransaction } from "@/lib/db";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -17,9 +17,8 @@ export const Route = createFileRoute("/_authenticated/history")({
 });
 
 export function HistoryPage() {
-  // Bổ sung object rỗng để tránh lỗi "Expected 2 arguments" nếu hook cần tham số
-  const { data: transactions = [], isLoading } = (useTransactions as any)();
-  const deleteTransaction = useDeleteTransaction();
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,34 +27,85 @@ export function HistoryPage() {
   // Form Chỉnh sửa
   const [editAmount, setEditAmount] = useState("");
   const [editNote, setEditNote] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Lọc danh sách giao dịch
+  // 🚀 Hàm lấy danh sách giao dịch trực tiếp từ Supabase
+  const fetchTransactions = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setTransactions(data || []);
+    } catch (err) {
+      toast.error((err as Error).message || "Không thể tải lịch sử giao dịch");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  // Lọc danh sách giao dịch theo Tìm kiếm & Loại
   const filteredTransactions = useMemo(() => {
-    return (transactions as any[]).filter((tx) => {
+    return transactions.filter((tx) => {
       const matchType = filterType === "all" ? true : tx.type === filterType;
-      const noteStr = String(tx.note || tx.description || "").toLowerCase();
-      const catStr = String(tx.category_name || tx.category || "").toLowerCase();
+      const noteStr = String(tx.note || tx.description || tx.category || "").toLowerCase();
       const queryStr = searchQuery.toLowerCase();
 
-      const matchSearch = noteStr.includes(queryStr) || catStr.includes(queryStr);
-      return matchType && matchSearch;
+      return matchType && noteStr.includes(queryStr);
     });
   }, [transactions, filterType, searchQuery]);
 
+  // 🚀 Xoá giao dịch
   const handleDelete = async (id: string) => {
     if (!confirm("Bạn có chắc chắn muốn xoá giao dịch này?")) return;
     try {
-      await deleteTransaction.mutateAsync(id);
-      toast.success("Đã xoá giao dịch thành công");
+      const { error } = await supabase.from("transactions").delete().eq("id", id);
+      if (error) throw error;
+      
+      toast.success("Đã xoá giao dịch thành công!");
+      setTransactions((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
       toast.error((err as Error).message || "Không thể xoá giao dịch");
     }
   };
 
+  // Mở modal sửa
   const handleOpenEdit = (tx: any) => {
     setEditingTx(tx);
     setEditAmount(String(tx.amount || 0));
     setEditNote(tx.note || tx.description || "");
+  };
+
+  // 🚀 Lưu thông tin sửa
+  const handleSaveEdit = async () => {
+    if (!editingTx) return;
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from("transactions")
+        .update({
+          amount: Number(editAmount),
+          note: editNote,
+        })
+        .eq("id", editingTx.id);
+
+      if (error) throw error;
+
+      toast.success("Đã cập nhật giao dịch!");
+      setEditingTx(null);
+      fetchTransactions(); // Tải lại dữ liệu mới nhất
+    } catch (err) {
+      toast.error((err as Error).message || "Cập nhật thất bại");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -116,14 +166,14 @@ export function HistoryPage() {
           </div>
         ) : filteredTransactions.length === 0 ? (
           <div className="rounded-[22px] border border-dashed border-[#D8D6CC] bg-white p-8 text-center text-xs font-bold text-[#8A8D7A]">
-            Không tìm thấy giao dịch nào
+            Chưa có giao dịch nào
           </div>
         ) : (
           filteredTransactions.map((tx) => {
             const isIncome = tx.type === "income";
-            const rawDate = tx.created_at || tx.date || tx.created_time;
+            const rawDate = tx.created_at || tx.date;
             const displayDate = rawDate ? new Date(rawDate).toLocaleDateString("vi-VN") : "";
-            const displayTitle = tx.note || tx.description || tx.category_name || tx.category || "Giao dịch";
+            const displayTitle = tx.note || tx.description || tx.category || "Giao dịch";
 
             return (
               <div
@@ -219,13 +269,11 @@ export function HistoryPage() {
               </Button>
               <Button
                 type="button"
-                onClick={() => {
-                  toast.success("Đã cập nhật thông tin giao dịch");
-                  setEditingTx(null);
-                }}
+                disabled={isSaving}
+                onClick={handleSaveEdit}
                 className="flex-1 rounded-full bg-[#16181D] text-xs font-bold text-white"
               >
-                Lưu thay đổi
+                {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
               </Button>
             </div>
           </div>
