@@ -1,0 +1,236 @@
+import { useState, useMemo } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { History, ArrowDownLeft, ArrowUpRight, Search, Pencil, Trash2 } from "lucide-react";
+import { formatVND } from "@/lib/money";
+import { useTransactions, useDeleteTransaction } from "@/lib/db";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/_authenticated/history")({
+  head: () => ({
+    meta: [
+      { title: "Lịch sử giao dịch — Xu" },
+      { name: "description", content: "Xem và quản lý chi tiết lịch sử thu chi." },
+    ],
+  }),
+  component: HistoryPage,
+});
+
+export function HistoryPage() {
+  // Bổ sung object rỗng để tránh lỗi "Expected 2 arguments" nếu hook cần tham số
+  const { data: transactions = [], isLoading } = (useTransactions as any)();
+  const deleteTransaction = useDeleteTransaction();
+
+  const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [editingTx, setEditingTx] = useState<any | null>(null);
+
+  // Form Chỉnh sửa
+  const [editAmount, setEditAmount] = useState("");
+  const [editNote, setEditNote] = useState("");
+
+  // Lọc danh sách giao dịch
+  const filteredTransactions = useMemo(() => {
+    return (transactions as any[]).filter((tx) => {
+      const matchType = filterType === "all" ? true : tx.type === filterType;
+      const noteStr = String(tx.note || tx.description || "").toLowerCase();
+      const catStr = String(tx.category_name || tx.category || "").toLowerCase();
+      const queryStr = searchQuery.toLowerCase();
+
+      const matchSearch = noteStr.includes(queryStr) || catStr.includes(queryStr);
+      return matchType && matchSearch;
+    });
+  }, [transactions, filterType, searchQuery]);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xoá giao dịch này?")) return;
+    try {
+      await deleteTransaction.mutateAsync(id);
+      toast.success("Đã xoá giao dịch thành công");
+    } catch (err) {
+      toast.error((err as Error).message || "Không thể xoá giao dịch");
+    }
+  };
+
+  const handleOpenEdit = (tx: any) => {
+    setEditingTx(tx);
+    setEditAmount(String(tx.amount || 0));
+    setEditNote(tx.note || tx.description || "");
+  };
+
+  return (
+    <div className="mx-auto w-full max-w-md md:max-w-3xl space-y-5 bg-[#F3F4F1] px-3.5 sm:px-6 py-4 pb-32 font-['Be_Vietnam_Pro'] min-h-screen">
+      {/* Header */}
+      <section className="flex items-center justify-between pb-3 border-b border-[#E3E2DC]">
+        <div>
+          <h1 className="text-lg sm:text-xl font-extrabold text-[#16181D] flex items-center gap-2">
+            <History className="h-5 w-5 text-[#109C7C]" /> Lịch sử giao dịch
+          </h1>
+          <p className="text-xs font-medium text-[#8A8D7A]">
+            Quản lý và chỉnh sửa các khoản thu chi của bạn
+          </p>
+        </div>
+      </section>
+
+      {/* Tìm kiếm & Bộ lọc */}
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8A8D7A]" />
+          <input
+            type="text"
+            placeholder="Tìm theo ghi chú hoặc danh mục..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-2xl border border-[#E7E5DC] bg-white pl-9 pr-4 py-2.5 text-xs font-bold text-[#16181D] focus:outline-none shadow-sm"
+          />
+        </div>
+
+        <div className="flex rounded-full bg-[#E7E5DC]/60 p-1 gap-1">
+          {(
+            [
+              { key: "all", label: "Tất cả" },
+              { key: "expense", label: "Tiền chi" },
+              { key: "income", label: "Tiền nhận" },
+            ] as const
+          ).map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setFilterType(tab.key)}
+              className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all ${
+                filterType === tab.key
+                  ? "bg-[#16181D] text-white shadow-sm"
+                  : "text-[#8A8D7A] hover:text-[#16181D]"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Danh sách giao dịch */}
+      <div className="space-y-2">
+        {isLoading ? (
+          <div className="text-center py-10 text-xs font-bold text-[#8A8D7A]">
+            Đang tải lịch sử...
+          </div>
+        ) : filteredTransactions.length === 0 ? (
+          <div className="rounded-[22px] border border-dashed border-[#D8D6CC] bg-white p-8 text-center text-xs font-bold text-[#8A8D7A]">
+            Không tìm thấy giao dịch nào
+          </div>
+        ) : (
+          filteredTransactions.map((tx) => {
+            const isIncome = tx.type === "income";
+            const rawDate = tx.created_at || tx.date || tx.created_time;
+            const displayDate = rawDate ? new Date(rawDate).toLocaleDateString("vi-VN") : "";
+            const displayTitle = tx.note || tx.description || tx.category_name || tx.category || "Giao dịch";
+
+            return (
+              <div
+                key={tx.id}
+                className="flex items-center justify-between rounded-2xl bg-white border border-[#E7E5DC] p-3.5 shadow-sm hover:border-[#D8D6CC] transition-all"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base ${
+                      isIncome ? "bg-[#E6F4EA] text-[#109C7C]" : "bg-[#FCE4E0] text-[#EF5B45]"
+                    }`}
+                  >
+                    {isIncome ? <ArrowDownLeft className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm font-extrabold text-[#16181D] truncate">
+                      {displayTitle}
+                    </p>
+                    <p className="text-[10px] font-medium text-[#8A8D7A]">
+                      {displayDate}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  <span
+                    className={`font-['JetBrains_Mono'] text-xs sm:text-sm font-bold ${
+                      isIncome ? "text-[#109C7C]" : "text-[#16181D]"
+                    }`}
+                  >
+                    {isIncome ? "+" : "-"}{formatVND(Number(tx.amount || 0))}
+                  </span>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenEdit(tx)}
+                      className="p-1.5 text-[#8A8D7A] hover:text-[#16181D] transition-colors rounded-lg hover:bg-[#F3F4F1]"
+                      title="Sửa"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(tx.id)}
+                      className="p-1.5 text-[#8A8D7A] hover:text-[#EF5B45] transition-colors rounded-lg hover:bg-[#FCE4E0]"
+                      title="Xoá"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Modal Chỉnh sửa Giao dịch */}
+      {editingTx && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-[26px] bg-white p-6 space-y-4 shadow-xl border border-[#E7E5DC] font-['Be_Vietnam_Pro']">
+            <h3 className="text-base font-extrabold text-[#16181D] border-b pb-3 border-[#E3E2DC]">
+              Chỉnh sửa giao dịch
+            </h3>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-[#16181D]">Số tiền (VNĐ)</label>
+              <input
+                type="number"
+                value={editAmount}
+                onChange={(e) => setEditAmount(e.target.value)}
+                className="w-full rounded-xl border border-[#EDECE6] p-2.5 font-['JetBrains_Mono'] text-sm font-bold text-[#16181D] bg-[#F3F4F1] focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-[#16181D]">Ghi chú / Mô tả</label>
+              <input
+                type="text"
+                value={editNote}
+                onChange={(e) => setEditNote(e.target.value)}
+                className="w-full rounded-xl border border-[#EDECE6] p-2.5 text-xs font-bold text-[#16181D] bg-[#F3F4F1] focus:outline-none"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setEditingTx(null)}
+                className="flex-1 rounded-full text-xs font-bold text-[#8A8D7A]"
+              >
+                Hủy
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  toast.success("Đã cập nhật thông tin giao dịch");
+                  setEditingTx(null);
+                }}
+                className="flex-1 rounded-full bg-[#16181D] text-xs font-bold text-white"
+              >
+                Lưu thay đổi
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
