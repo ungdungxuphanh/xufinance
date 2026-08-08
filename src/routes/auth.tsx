@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { Browser } from '@capacitor/browser';
+import { App as CapApp } from '@capacitor/app'; // 👈 Bổ sung package App để bắt Deep Link
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -31,10 +33,42 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Kiểm tra session hiện tại và lắng nghe Deep Link trả về từ Safari
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/dashboard", replace: true });
     });
+
+    // 👇 Lắng nghe sự kiện mở app từ Deep Link (xufinance://google-auth)
+    const handleDeepLink = async () => {
+      CapApp.addListener("appUrlOpen", async (event) => {
+        if (event.url && event.url.includes("xufinance")) {
+          const formattedUrl = event.url.replace("#", "?");
+          const urlObj = new URL(formattedUrl);
+          
+          const accessToken = urlObj.searchParams.get("access_token");
+          const refreshToken = urlObj.searchParams.get("refresh_token");
+
+          if (accessToken && refreshToken) {
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+
+            if (!error) {
+              await Browser.close(); // 👈 Đóng cửa sổ Safari ngay lập tức
+              navigate({ to: "/dashboard", replace: true }); // 👈 Chuyển vào Dashboard
+            }
+          }
+        }
+      });
+    };
+
+    handleDeepLink();
+
+    return () => {
+      CapApp.removeAllListeners();
+    };
   }, [navigate]);
 
   async function submit(e: React.FormEvent) {
@@ -69,19 +103,18 @@ function AuthPage() {
   }
 
  async function google() {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          // 👉 Sửa lại trỏ thẳng về gốc domain hoặc /dashboard/
-          redirectTo: `${window.location.origin}/auth`,
-        },
-      });
-      if (error) throw error;
-    } catch (err) {
-      toast.error((err as Error).message || "Không đăng nhập được bằng Google");
-    }
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: "xufinance://google-auth",
+      },
+    });
+    if (error) throw error;
+  } catch (err) {
+    toast.error((err as Error).message || "Không đăng nhập được bằng Google");
   }
+}
 
   return (
     <main className="mesh-bg flex min-h-screen items-center justify-center px-5 py-12">

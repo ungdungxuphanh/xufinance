@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Wallet as WalletIcon, PieChart, Coins } from "lucide-react";
+import { Pencil, Plus, Trash2, Wallet as WalletIcon, PieChart, Coins, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +45,9 @@ function SummaryPage() {
   const [editing, setEditing] = useState<Wallet | null>(null);
   const [open, setOpen] = useState(false);
 
+  // State quản lý Modal xác nhận xóa ví
+  const [deletingWallet, setDeletingWallet] = useState<Wallet | null>(null);
+
   // Tính số dư thực tế của từng ví = Số dư ban đầu + Thu - Chi
   const balances = useMemo(() => {
     const map = new Map<string, number>();
@@ -80,13 +83,15 @@ function SummaryPage() {
     return { list, max };
   }, [txs, categories]);
 
-  const handleDeleteWallet = (id: string, name: string) => {
-    if (confirm(`Bạn có chắc chắn muốn xóa ví "${name}" không?`)) {
-      del.mutate(id, {
-        onSuccess: () => toast.success("Đã xóa ví thành công"),
-        onError: (err) => toast.error((err as Error).message),
-      });
-    }
+  const confirmDelete = () => {
+    if (!deletingWallet) return;
+    del.mutate(deletingWallet.id, {
+      onSuccess: () => {
+        toast.success("Đã xóa ví thành công");
+        setDeletingWallet(null);
+      },
+      onError: (err) => toast.error((err as Error).message),
+    });
   };
 
   return (
@@ -131,7 +136,7 @@ function SummaryPage() {
         </div>
       </section>
 
-      {/* 3. Bố cục Grid Responsive (1 Cột iPhone, 2 Cột MacBook/Desktop) */}
+      {/* 3. Bố cục Grid Responsive */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* CỘT BÊN TRÁI: Danh sách Ví */}
@@ -187,7 +192,7 @@ function SummaryPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDeleteWallet(w.id, w.name)}
+                      onClick={() => setDeletingWallet(w)}
                       className="h-8 w-8 rounded-full text-[#8A8D7A] hover:text-[#EF5B45] hover:bg-[#FCE4E0]"
                       aria-label="Xoá ví"
                     >
@@ -246,6 +251,43 @@ function SummaryPage() {
 
       {/* Dialog Thêm/Sửa Ví */}
       <WalletDialog open={open} onOpenChange={setOpen} editing={editing} />
+
+      {/* Dialog XÁC NHẬN XÓA VÍ (Giao diện chuẩn Web) */}
+      <Dialog open={!!deletingWallet} onOpenChange={(v) => !v && setDeletingWallet(null)}>
+        <DialogContent className="sm:max-w-sm rounded-[26px] bg-white p-6 font-['Be_Vietnam_Pro'] border-[#E7E5DC]">
+          <div className="flex flex-col items-center text-center space-y-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FCE4E0] text-[#EF5B45]">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <DialogHeader>
+              <DialogTitle className="text-base font-extrabold text-[#16181D]">
+                Xác nhận xóa ví?
+              </DialogTitle>
+            </DialogHeader>
+            <p className="text-xs font-medium text-[#8A8D7A]">
+              Bạn có chắc chắn muốn xóa ví <span className="font-bold text-[#16181D]">"{deletingWallet?.name}"</span> không? Hành động này không thể hoàn tác.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 mt-4">
+            <Button
+              variant="outline"
+              className="flex-1 rounded-full border-[#EDECE6] font-bold text-xs py-2.5 h-auto text-[#16181D] hover:bg-[#F3F4F1]"
+              onClick={() => setDeletingWallet(null)}
+            >
+              Hủy
+            </Button>
+            <Button
+              className="flex-1 rounded-full bg-[#EF5B45] hover:bg-[#d94a34] text-white font-bold text-xs py-2.5 h-auto transition-all"
+              onClick={confirmDelete}
+              disabled={del.isPending}
+            >
+              {del.isPending ? "Đang xóa..." : "Xóa ví"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
