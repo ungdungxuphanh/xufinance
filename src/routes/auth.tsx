@@ -74,17 +74,23 @@ function AuthPage() {
     };
   }, [navigate]);
 
-  async function submit(e: React.FormEvent) {
+async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
       if (mode === "signup") {
+        // 💡 Khắc phục lỗi 1: Safe call và fallback chuỗi rỗng
+        const defaultUsername = (identifier || "").split("@")[0]?.toLowerCase() || "";
+
         const { data, error } = await supabase.auth.signUp({
           email: identifier,
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { full_name: name },
+            data: {
+              full_name: name,
+              username: defaultUsername,
+            },
           },
         });
         if (error) throw error;
@@ -94,25 +100,20 @@ function AuthPage() {
         }
         navigate({ to: "/dashboard", replace: true });
       } else {
-        // 🚀 Xử lý Đăng nhập bằng Email HOẶC Username
         let loginEmail = identifier.trim();
 
-        // Nếu người dùng nhập vào KHÔNG có '@' -> Xem như Username và tra cứu Email
-       // Nếu người dùng nhập vào KHÔNG có '@' -> Xem như Username và tra cứu Email
+        // 🚀 Xử lý Đăng nhập bằng Username
         if (!loginEmail.includes("@")) {
-          const { data: profileData, error: profileErr } = await supabase
-            .from("profiles")
-            .select("*") // 👈 Sửa .select("email") thành .select("*") hoặc cast type bên dưới
-            .eq("username", loginEmail.toLowerCase())
-            .maybeSingle();
+          // 💡 Khắc phục lỗi 2: Dùng (supabase.rpc as any) để bỏ qua kiểm tra type RPC chưa sync
+          const { data: fetchedEmail, error: rpcErr } = await (supabase.rpc as any)(
+            "get_email_by_username",
+            { p_username: loginEmail.toLowerCase() }
+          );
 
-          // Ép kiểu (profileData as any) để TypeScript không báo lỗi
-          const userEmail = (profileData as any)?.email;
-
-          if (profileErr || !userEmail) {
+          if (rpcErr || !fetchedEmail) {
             throw new Error("Không tìm thấy Tên đăng nhập (Username) này!");
           }
-          loginEmail = userEmail;
+          loginEmail = fetchedEmail as string;
         }
 
         const { error } = await supabase.auth.signInWithPassword({
