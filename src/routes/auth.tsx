@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { Capacitor } from '@capacitor/core'; // 👈 Thêm import này ở đầu file
 import { Browser } from '@capacitor/browser';
 import { App as CapApp } from '@capacitor/app'; // 👈 Bổ sung package App để bắt Deep Link
 
@@ -102,12 +103,21 @@ function AuthPage() {
     }
   }
 
- async function google() {
+async function google() {
   try {
+    // Kiểm tra xem người dùng đang chạy trên App Native hay trên Web
+    const isNative = Capacitor.isNativePlatform();
+    
+    // Nếu là Web: Chuyển thẳng về https://xufinance.netlify.app/dashboard
+    // Nếu là App: Dùng Scheme Deep Link xufinance://google-auth
+    const redirectUrl = isNative 
+      ? "xufinance://google-auth" 
+      : `${window.location.origin}/dashboard`;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "xufinance://google-auth",
+        redirectTo: redirectUrl,
       },
     });
     if (error) throw error;
