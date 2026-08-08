@@ -68,13 +68,13 @@ function AuthPage() {
     }
   }
 
-  async function google() {
+ async function google() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          // Xoá dòng /dashboard cũ và đổi thành đường dẫn callback chuẩn của Supabase:
-          redirectTo: `${window.location.origin}/auth/v1/callback`, 
+          // 👉 Sửa lại trỏ thẳng về gốc domain hoặc /dashboard/
+          redirectTo: `${window.location.origin}/auth`,
         },
       });
       if (error) throw error;
