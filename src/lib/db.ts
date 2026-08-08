@@ -37,6 +37,18 @@ export type Transaction = {
   note: string | null;
 };
 
+// --- BỔ SUNG TYPE QUỸ / BUDGET ---
+export type Budget = {
+  id: string;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  icon: string;
+  color: string;
+  deadline?: string | null;
+  created_at?: string;
+};
+
 async function uid() {
   const { data } = await supabase.auth.getUser();
   if (!data.user) throw new Error("Chưa đăng nhập");
@@ -111,6 +123,25 @@ export function useAllTransactions() {
         .select("id,wallet_id,category_id,type,amount,occurred_on,note");
       if (error) throw error;
       return (data ?? []).map((t) => ({ ...t, amount: Number(t.amount) })) as Transaction[];
+    },
+  });
+}
+
+// --- BỔ SUNG HOOK QUẢN LÝ QUỸ (BUDGETS) ---
+export function useBudgets() {
+  return useQuery({
+    queryKey: ["budgets"],
+    queryFn: async () => {
+      const { data, error } = await (supabase.from("budgets" as any) as any)
+        .select("*")
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+      return ((data ?? []) as any[]).map((b) => ({
+        ...b,
+        target_amount: Number(b.target_amount ?? 0),
+        current_amount: Number(b.current_amount ?? 0),
+      })) as Budget[];
     },
   });
 }
@@ -216,6 +247,48 @@ export function useDeleteNote() {
       if (error) throw error;
     },
     onSuccess: () => invalidate(["category_notes"]),
+  });
+}
+
+// --- BỔ SUNG MUTATIONS DÀNH CHO QUỸ ---
+export function useSaveBudget() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: async (input: Partial<Budget> & { name: string }) => {
+      const user_id = await uid();
+      const payload = { ...input, user_id };
+      const { error } = input.id
+        ? await (supabase.from("budgets" as any) as any).update(payload).eq("id", input.id)
+        : await (supabase.from("budgets" as any) as any).insert(payload);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidate(["budgets"]),
+  });
+}
+
+export function useDeleteBudget() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase.from("budgets" as any) as any)
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidate(["budgets"]),
+  });
+}
+
+export function useUpdateBudgetAmount() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: async ({ id, current_amount }: { id: string; current_amount: number }) => {
+      const { error } = await (supabase.from("budgets" as any) as any)
+        .update({ current_amount })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidate(["budgets"]),
   });
 }
 

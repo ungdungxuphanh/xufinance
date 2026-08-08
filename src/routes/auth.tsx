@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { Capacitor } from '@capacitor/core'; // 👈 Thêm import này ở đầu file
+import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
-import { App as CapApp } from '@capacitor/app'; // 👈 Bổ sung package App để bắt Deep Link
+import { App as CapApp } from '@capacitor/app';
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/auth")({
       { title: "Đăng nhập — Xu" },
       { name: "description", content: "Đăng nhập hoặc tạo tài khoản Xu để quản lí thu chi của bạn." },
       { property: "og:title", content: "Đăng nhập — Xu" },
-      { property: "og:description", content: "Đăng nhập bằng Google hoặc email để bắt đầu." },
+      { property: "og:description", content: "Đăng nhập bằng Google hoặc email/username để bắt đầu." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -29,7 +29,9 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("");
+  
+  // 💡 State lưu Username hoặc Email
+  const [identifier, setIdentifier] = useState(""); 
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,7 +42,7 @@ function AuthPage() {
       if (data.session) navigate({ to: "/dashboard", replace: true });
     });
 
-    // 👇 Lắng nghe sự kiện mở app từ Deep Link (xufinance://google-auth)
+    // Lắng nghe sự kiện mở app từ Deep Link (xufinance://google-auth)
     const handleDeepLink = async () => {
       CapApp.addListener("appUrlOpen", async (event) => {
         if (event.url && event.url.includes("xufinance")) {
@@ -57,8 +59,8 @@ function AuthPage() {
             });
 
             if (!error) {
-              await Browser.close(); // 👈 Đóng cửa sổ Safari ngay lập tức
-              navigate({ to: "/dashboard", replace: true }); // 👈 Chuyển vào Dashboard
+              await Browser.close(); // Đóng cửa sổ Safari ngay lập tức
+              navigate({ to: "/dashboard", replace: true }); // Chuyển vào Dashboard
             }
           }
         }
@@ -78,7 +80,7 @@ function AuthPage() {
     try {
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
-          email,
+          email: identifier,
           password,
           options: {
             emailRedirectTo: window.location.origin,
@@ -92,39 +94,67 @@ function AuthPage() {
         }
         navigate({ to: "/dashboard", replace: true });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        // 🚀 Xử lý Đăng nhập bằng Email HOẶC Username
+        let loginEmail = identifier.trim();
+
+        // Nếu người dùng nhập vào KHÔNG có '@' -> Xem như Username và tra cứu Email
+       // Nếu người dùng nhập vào KHÔNG có '@' -> Xem như Username và tra cứu Email
+        if (!loginEmail.includes("@")) {
+          const { data: profileData, error: profileErr } = await supabase
+            .from("profiles")
+            .select("*") // 👈 Sửa .select("email") thành .select("*") hoặc cast type bên dưới
+            .eq("username", loginEmail.toLowerCase())
+            .maybeSingle();
+
+          // Ép kiểu (profileData as any) để TypeScript không báo lỗi
+          const userEmail = (profileData as any)?.email;
+
+          if (profileErr || !userEmail) {
+            throw new Error("Không tìm thấy Tên đăng nhập (Username) này!");
+          }
+          loginEmail = userEmail;
+        }
+
+        const { error } = await supabase.auth.signInWithPassword({
+          email: loginEmail,
+          password,
+        });
+
         if (error) throw error;
         navigate({ to: "/dashboard", replace: true });
       }
     } catch (err) {
-      toast.error((err as Error).message);
+      toast.error((err as Error).message || "Đăng nhập thất bại");
     } finally {
       setLoading(false);
     }
   }
 
-async function google() {
-  try {
-    // Kiểm tra xem người dùng đang chạy trên App Native hay trên Web
-    const isNative = Capacitor.isNativePlatform();
-    
-    // Nếu là Web: Chuyển thẳng về https://xufinance.netlify.app/dashboard
-    // Nếu là App: Dùng Scheme Deep Link xufinance://google-auth
-    const redirectUrl = isNative 
-      ? "xufinance://google-auth" 
-      : `${window.location.origin}/dashboard`;
+  async function google() {
+    try {
+      const isNative = Capacitor.isNativePlatform();
+      
+      const redirectUrl = isNative 
+        ? "xufinance://google-auth" 
+        : `${window.location.origin}/dashboard`;
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: redirectUrl,
-      },
-    });
-    if (error) throw error;
-  } catch (err) {
-    toast.error((err as Error).message || "Không đăng nhập được bằng Google");
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: isNative, 
+        },
+      });
+
+      if (error) throw error;
+
+      if (isNative && data?.url) {
+        await Browser.open({ url: data.url });
+      }
+    } catch (err) {
+      toast.error((err as Error).message || "Không đăng nhập được bằng Google");
+    }
   }
-}
 
   return (
     <main className="mesh-bg flex min-h-screen items-center justify-center px-5 py-12">
@@ -168,16 +198,21 @@ async function google() {
                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
               </div>
             )}
+
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="identifier">
+                {mode === "signin" ? "Email hoặc Username" : "Email"}
+              </Label>
               <Input
-                id="email"
-                type="email"
+                id="identifier"
+                type={mode === "signin" ? "text" : "email"}
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder={mode === "signin" ? "vdu: phuneng hoặc email@gmail.com" : "email@gmail.com"}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
               />
             </div>
+
             <div className="space-y-1.5">
               <Label htmlFor="password">Mật khẩu</Label>
               <Input
@@ -189,8 +224,9 @@ async function google() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+
             <Button type="submit" className="w-full font-display" disabled={loading}>
-              {mode === "signin" ? "Đăng nhập" : "Tạo tài khoản"}
+              {loading ? "Đang xử lý..." : mode === "signin" ? "Đăng nhập" : "Tạo tài khoản"}
             </Button>
           </form>
         </div>

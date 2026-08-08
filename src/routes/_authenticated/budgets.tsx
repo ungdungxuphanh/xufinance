@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   PiggyBank,
@@ -15,7 +15,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatVND } from "@/lib/money";
-import { useWallets } from "@/lib/db";
+import {
+  useWallets,
+  useBudgets,
+  useSaveBudget,
+  useDeleteBudget,
+  useUpdateBudgetAmount,
+  type Budget,
+} from "@/lib/db";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/budgets")({
   head: () => ({
@@ -27,57 +35,17 @@ export const Route = createFileRoute("/_authenticated/budgets")({
   component: BudgetsPage,
 });
 
-interface Fund {
-  id: string;
-  name: string;
-  targetAmount: number;
-  currentAmount: number;
-  icon: string;
-  color: string;
-  deadline?: string;
-}
-
 const PRESET_ICONS = ["🏖️", "💻", "🛡️", "🚗", "🏠", "✈️", "🎓", "💎", "🎯", "🎮"];
 const PRESET_COLORS = ["#109C7C", "#3B82F6", "#8B5CF6", "#EC4899", "#F59E0B", "#EF4444"];
 
 export function BudgetsPage() {
   const { data: wallets = [] } = useWallets();
+  const { data: funds = [], isLoading } = useBudgets();
 
-  // Khởi tạo danh sách Quỹ từ localStorage (nếu có)
-  const [funds, setFunds] = useState<Fund[]>(() => {
-    const saved = localStorage.getItem("xu_funds");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Lỗi đọc dữ liệu quỹ từ localStorage", e);
-      }
-    }
-    return [
-      {
-        id: "1",
-        name: "Đi chơi cuối năm",
-        targetAmount: 5000000,
-        currentAmount: 1500000,
-        icon: "🏖️",
-        color: "#3B82F6",
-        deadline: "2026-12-31",
-      },
-      {
-        id: "2",
-        name: "Quỹ dự phòng",
-        targetAmount: 10000000,
-        currentAmount: 3000000,
-        icon: "🛡️",
-        color: "#109C7C",
-      },
-    ];
-  });
-
-  // Tự động lưu vào localStorage mỗi khi danh sách funds thay đổi
-  useEffect(() => {
-    localStorage.setItem("xu_funds", JSON.stringify(funds));
-  }, [funds]);
+  // React Query Mutation Hooks
+  const saveBudget = useSaveBudget();
+  const deleteBudget = useDeleteBudget();
+  const updateBudgetAmount = useUpdateBudgetAmount();
 
   // Modals state
   const [fundModalOpen, setFundModalOpen] = useState(false);
@@ -85,8 +53,8 @@ export function BudgetsPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   // Selected fund for actions
-  const [editingFund, setEditingFund] = useState<Fund | null>(null);
-  const [selectedFundForTransfer, setSelectedFundForTransfer] = useState<Fund | null>(null);
+  const [editingFund, setEditingFund] = useState<Budget | null>(null);
+  const [selectedFundForTransfer, setSelectedFundForTransfer] = useState<Budget | null>(null);
 
   // Form Quỹ (Tạo / Sửa)
   const [formName, setFormName] = useState("");
@@ -99,14 +67,15 @@ export function BudgetsPage() {
   const [transferType, setTransferType] = useState<"in" | "out">("in");
   const [selectedWalletId, setSelectedWalletId] = useState("");
   const [amountInput, setAmountInput] = useState("");
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
 
   // Thống kê tính toán
   const totalInFunds = useMemo(() => {
-    return funds.reduce((sum, f) => sum + f.currentAmount, 0);
+    return funds.reduce((sum, f) => sum + Number(f.current_amount || 0), 0);
   }, [funds]);
 
   const totalTarget = useMemo(() => {
-    return funds.reduce((sum, f) => sum + f.targetAmount, 0);
+    return funds.reduce((sum, f) => sum + Number(f.target_amount || 0), 0);
   }, [funds]);
 
   const overallProgress = useMemo(() => {
@@ -126,10 +95,10 @@ export function BudgetsPage() {
   };
 
   // Mở modal chỉnh sửa quỹ
-  const handleOpenEditModal = (fund: Fund) => {
+  const handleOpenEditModal = (fund: Budget) => {
     setEditingFund(fund);
     setFormName(fund.name);
-    setFormTarget(fund.targetAmount ? fund.targetAmount.toString() : "");
+    setFormTarget(fund.target_amount ? fund.target_amount.toString() : "");
     setFormIcon(fund.icon);
     setFormColor(fund.color || "#109C7C");
     setFormDeadline(fund.deadline || "");
@@ -137,83 +106,77 @@ export function BudgetsPage() {
   };
 
   // Lưu thông tin Quỹ (Tạo / Sửa)
-  const handleSaveFund = (e: React.FormEvent) => {
+  const handleSaveFund = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName) return;
+    setLoadingSubmit(true);
 
-    if (editingFund) {
-      setFunds((prev) =>
-        prev.map((f) => {
-          if (f.id === editingFund.id) {
-            const updated: Fund = {
-              ...f,
-              name: formName,
-              targetAmount: Number(formTarget) || 0,
-              icon: formIcon,
-              color: formColor,
-            };
-
-            if (formDeadline) {
-              updated.deadline = formDeadline;
-            } else {
-              delete updated.deadline;
-            }
-
-            return updated;
-          }
-          return f;
-        })
-      );
-    } else {
-      const newFund: Fund = {
-        id: Date.now().toString(),
+    try {
+      await saveBudget.mutateAsync({
+        ...(editingFund ? { id: editingFund.id } : {}),
         name: formName,
-        targetAmount: Number(formTarget) || 0,
-        currentAmount: 0,
+        target_amount: Number(formTarget) || 0,
         icon: formIcon,
         color: formColor,
-        ...(formDeadline ? { deadline: formDeadline } : {}),
-      };
-      setFunds((prev) => [...prev, newFund]);
-    }
+        deadline: formDeadline || null,
+      });
 
-    setFundModalOpen(false);
+      toast.success(editingFund ? "Cập nhật Quỹ thành công" : "Tạo Quỹ mới thành công");
+      setFundModalOpen(false);
+    } catch (err) {
+      toast.error((err as Error).message || "Có lỗi xảy ra");
+    } finally {
+      setLoadingSubmit(false);
+    }
   };
 
   // Xác nhận xoá Quỹ
-  const handleConfirmDelete = () => {
-    if (editingFund) {
-      setFunds((prev) => prev.filter((f) => f.id !== editingFund.id));
+  const handleConfirmDelete = async () => {
+    if (!editingFund) return;
+    try {
+      await deleteBudget.mutateAsync(editingFund.id);
+      toast.success("Đã xoá Quỹ");
       setDeleteConfirmOpen(false);
       setFundModalOpen(false);
       setEditingFund(null);
+    } catch (err) {
+      toast.error((err as Error).message || "Không thể xoá Quỹ");
     }
   };
 
-  // Xử lý Chuyển tiền
-  const handleTransfer = (e: React.FormEvent) => {
+  // Xử lý Chuyển tiền vào/rút khỏi Quỹ
+  const handleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFundForTransfer || !amountInput || !selectedWalletId) return;
 
     const amount = Number(amountInput);
     if (amount <= 0) return;
 
-    setFunds((prev) =>
-      prev.map((f) => {
-        if (f.id === selectedFundForTransfer.id) {
-          const updatedAmount =
-            transferType === "in"
-              ? f.currentAmount + amount
-              : f.currentAmount - amount;
-          return { ...f, currentAmount: Math.max(0, updatedAmount) };
-        }
-        return f;
-      })
-    );
+    setLoadingSubmit(true);
+    try {
+      const current = Number(selectedFundForTransfer.current_amount || 0);
+      const updatedAmount =
+        transferType === "in"
+          ? current + amount
+          : Math.max(0, current - amount);
 
-    setTransferOpen(false);
-    setAmountInput("");
-    setSelectedFundForTransfer(null);
+      await updateBudgetAmount.mutateAsync({
+        id: selectedFundForTransfer.id,
+        current_amount: updatedAmount,
+      });
+
+      toast.success(
+        transferType === "in" ? "Đã cất tiền vào Quỹ" : "Đã rút tiền về Ví"
+      );
+
+      setTransferOpen(false);
+      setAmountInput("");
+      setSelectedFundForTransfer(null);
+    } catch (err) {
+      toast.error((err as Error).message || "Chuyển tiền thất bại");
+    } finally {
+      setLoadingSubmit(false);
+    }
   };
 
   return (
@@ -236,12 +199,10 @@ export function BudgetsPage() {
         </Button>
       </section>
 
-      {/* 2. Responsive Grid Bố cục chính */}
+      {/* 2. Bố cục chính */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        {/* CỘT BÊN TRÁI: Thẻ tổng quát & Tiến độ mục tiêu */}
+        {/* CỘT TRÁI: Thẻ tổng quát */}
         <div className="lg:col-span-5 xl:col-span-4 space-y-6">
-          {/* Hero Card Tổng Tiền Quỹ */}
           <section className="relative rounded-[26px] bg-white border border-[#E7E5DC] shadow-sm pt-6 pb-5 px-6 overflow-hidden">
             <div className="flex items-start justify-between">
               <div>
@@ -282,7 +243,7 @@ export function BudgetsPage() {
           </section>
         </div>
 
-        {/* CỘT BÊN PHẢI: Danh sách Quỹ tiết kiệm */}
+        {/* CỘT PHẢI: Danh sách Quỹ */}
         <div className="lg:col-span-7 xl:col-span-8 space-y-3">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-sm sm:text-base font-extrabold text-[#16181D]">
@@ -291,16 +252,19 @@ export function BudgetsPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
-            {funds.length === 0 ? (
+            {isLoading ? (
+              <div className="col-span-full text-center py-8 text-xs font-bold text-[#8A8D7A]">
+                Đang tải danh sách quỹ...
+              </div>
+            ) : funds.length === 0 ? (
               <div className="col-span-full rounded-[26px] border border-dashed border-[#D8D6CC] bg-white p-8 text-center text-xs sm:text-sm font-bold text-[#8A8D7A]">
                 Chưa có quỹ nào — Bấm nút "Tạo quỹ" để bắt đầu tích lũy nhé
               </div>
             ) : (
-              funds.map((fund) => {
-                const percent =
-                  fund.targetAmount > 0
-                    ? Math.min(100, Math.round((fund.currentAmount / fund.targetAmount) * 100))
-                    : 0;
+              funds.map((fund: Budget) => {
+                const target = Number(fund.target_amount || 0);
+                const current = Number(fund.current_amount || 0);
+                const percent = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
 
                 return (
                   <div
@@ -323,14 +287,13 @@ export function BudgetsPage() {
                             <button
                               onClick={() => handleOpenEditModal(fund)}
                               className="text-[#8A8D7A] hover:text-[#16181D] transition-colors p-0.5"
-                              aria-label="Sửa quỹ"
                             >
                               <Pencil className="h-3.5 w-3.5" />
                             </button>
                           </div>
 
                           <p className="text-[11px] font-semibold text-[#8A8D7A] truncate">
-                            Mục tiêu: {fund.targetAmount > 0 ? formatVND(fund.targetAmount) : "Không giới hạn"}
+                            Mục tiêu: {target > 0 ? formatVND(target) : "Không giới hạn"}
                           </p>
 
                           {fund.deadline && (
@@ -358,13 +321,11 @@ export function BudgetsPage() {
                     <div className="space-y-1 pt-1">
                       <div className="flex justify-between text-xs font-['JetBrains_Mono'] font-bold">
                         <span style={{ color: fund.color }}>
-                          {formatVND(fund.currentAmount)}
+                          {formatVND(current)}
                         </span>
-                        {fund.targetAmount > 0 && (
-                          <span className="text-[#8A8D7A]">{percent}%</span>
-                        )}
+                        {target > 0 && <span className="text-[#8A8D7A]">{percent}%</span>}
                       </div>
-                      {fund.targetAmount > 0 && (
+                      {target > 0 && (
                         <div className="h-2 w-full rounded-full bg-[#F3F4F1] overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-300"
@@ -382,7 +343,6 @@ export function BudgetsPage() {
             )}
           </div>
         </div>
-
       </div>
 
       {/* Modal 1: Tạo mới / Chỉnh sửa Quỹ */}
@@ -461,7 +421,7 @@ export function BudgetsPage() {
 
             {/* Thời hạn Quỹ */}
             <div className="space-y-1">
-              <label className="text-xs font-bold text-[#16181D]">Thời hạn hoàn thành (Không bắt buộc)</label>
+              <label className="text-xs font-bold text-[#16181D]">Thời hạn hoàn thành</label>
               <input
                 type="date"
                 value={formDeadline}
@@ -499,16 +459,17 @@ export function BudgetsPage() {
               </Button>
               <Button
                 type="submit"
+                disabled={loadingSubmit}
                 className="flex-1 rounded-full bg-[#16181D] text-xs font-bold text-white hover:bg-[#2A2E37]"
               >
-                {editingFund ? "Cập nhật" : "Tạo quỹ"}
+                {loadingSubmit ? "Đang lưu..." : editingFund ? "Cập nhật" : "Tạo quỹ"}
               </Button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Modal 2: Bảng hỏi xác nhận xoá Quỹ */}
+      {/* Modal 2: Xác nhận xóa Quỹ */}
       {deleteConfirmOpen && editingFund && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="w-full max-w-xs rounded-[26px] bg-white p-5 text-center space-y-4 shadow-2xl border border-[#E7E5DC] font-['Be_Vietnam_Pro']">
@@ -546,7 +507,7 @@ export function BudgetsPage() {
         </div>
       )}
 
-      {/* Modal 3: Chuyển tiền Ví <-> Quỹ */}
+      {/* Modal 3: Chuyển tiền */}
       {transferOpen && selectedFundForTransfer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <form
@@ -559,7 +520,6 @@ export function BudgetsPage() {
               </h3>
             </div>
 
-            {/* Hướng chuyển */}
             <div className="flex rounded-full bg-[#F3F4F1] p-1">
               <button
                 type="button"
@@ -585,7 +545,6 @@ export function BudgetsPage() {
               </button>
             </div>
 
-            {/* Chọn Ví liên kết */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-[#16181D] flex items-center gap-1">
                 <Wallet className="h-3.5 w-3.5 text-[#109C7C]" /> Chọn Ví giao dịch
@@ -605,7 +564,6 @@ export function BudgetsPage() {
               </select>
             </div>
 
-            {/* Nhập số tiền */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-[#16181D]">Số tiền (VNĐ)</label>
               <input
@@ -629,9 +587,10 @@ export function BudgetsPage() {
               </Button>
               <Button
                 type="submit"
+                disabled={loadingSubmit}
                 className="flex-1 rounded-full bg-[#109C7C] text-xs font-bold text-white hover:bg-[#0E8569]"
               >
-                Xác nhận
+                {loadingSubmit ? "Đang xử lý..." : "Xác nhận"}
               </Button>
             </div>
           </form>
