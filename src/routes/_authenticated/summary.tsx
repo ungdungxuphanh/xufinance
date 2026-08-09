@@ -65,19 +65,32 @@ function SummaryPage() {
   // State quản lý Modal xác nhận xóa ví
   const [deletingWallet, setDeletingWallet] = useState<Wallet | null>(null);
 
-  // Tính số dư thực tế của từng ví = Số dư ban đầu + Thu - Chi
-  const balances = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const w of wallets) map.set(w.id, w.initial_balance ?? 0);
-    for (const t of txs) {
-      if (!t.wallet_id) continue;
-      map.set(
-        t.wallet_id,
-        (map.get(t.wallet_id) ?? 0) + (t.type === "income" ? t.amount : -t.amount)
-      );
+ // 💡 TÍNH SỐ DƯ THỰC TẾ CỦA TỪNG VÍ:
+const balances = useMemo(() => {
+  const map = new Map<string, number>();
+  
+  // 1. Khởi tạo số dư ban đầu cho tất cả các ví
+  for (const w of wallets) {
+    map.set(w.id, w.initial_balance ?? 0);
+  }
+
+  // 2. Duyệt qua từng giao dịch để cộng/trừ tiền
+  for (const t of txs) {
+    if (!t.wallet_id) continue;
+
+    const currentBalance = map.get(t.wallet_id) ?? 0;
+
+    if (t.type === "income") {
+      // Thu nhập: Cộng tiền vào ví
+      map.set(t.wallet_id, currentBalance + t.amount);
+    } else if (t.type === "expense" || t.type === "budget" || t.type === "transfer") {
+      // Chi tiêu / Nạp Quỹ / Chuyển khoản: Trừ tiền khỏi ví
+      map.set(t.wallet_id, currentBalance - t.amount);
     }
-    return map;
-  }, [wallets, txs]);
+  }
+
+  return map;
+}, [wallets, txs]);
 
   // Tổng tài sản = Tổng số dư thực tế của tất cả các ví
   const total = useMemo(
@@ -209,7 +222,7 @@ function SummaryPage() {
         </div>
       </div>
 
-      {/* 3. Bố cục Grid / List (Được lấp đầy 2 cột cân đối) */}
+      {/* 3. Bố cục Grid / List */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         
         {/* CỘT BÊN TRÁI: Danh sách Ví (Chiếm 7/12 cột) */}
@@ -361,7 +374,7 @@ function SummaryPage() {
           )}
         </section>
 
-        {/* CỘT BÊN PHẢI: Thống kê Chi tiêu theo Phân loại (Chiếm 5/12 cột, Luôn hiển thị) */}
+        {/* CỘT BÊN PHẢI: Thống kê Chi tiêu theo Phân loại */}
         <section className="lg:col-span-5 space-y-3">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
@@ -402,7 +415,6 @@ function SummaryPage() {
                 ))}
               </div>
             ) : (
-              /* TRẠNG THÁI TRỐNG KHI CHƯA CÓ GIAO DỊCH CHI TIÊU */
               <div className="flex flex-col items-center justify-center text-center py-8 px-4 space-y-2">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                   <Inbox className="h-5 w-5" />

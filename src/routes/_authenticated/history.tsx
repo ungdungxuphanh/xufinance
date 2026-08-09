@@ -41,14 +41,25 @@ export const Route = createFileRoute("/_authenticated/history")({
 
 const ITEMS_PER_PAGE = 15;
 
+type DateFilterType = "this_week" | "this_month" | "this_year" | "custom";
+
 export function HistoryPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Bộ lọc
+  // Bộ lọc loại giao dịch & tìm kiếm
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Bộ lọc thời gian (Mặc định là "Tuần này")
+  const [dateFilter, setDateFilter] = useState<DateFilterType>("this_week");
+  const [customStartDate, setCustomStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().split("T")[0];
+  });
+  const [customEndDate, setCustomEndDate] = useState(() => new Date().toISOString().split("T")[0]);
 
   // Modals state
   const [editingTx, setEditingTx] = useState<any | null>(null);
@@ -64,10 +75,10 @@ export function HistoryPage() {
   const fetchTransactions = async () => {
     setIsLoading(true);
     try {
-     const { data, error } = await supabase
-  .from("transactions")
-  .select("*, categories(name, icon, color), wallets:wallet_id(name)")
-  .order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("*, categories(name, icon, color), wallets:wallet_id(name)")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setTransactions(data || []);
@@ -82,18 +93,55 @@ export function HistoryPage() {
     fetchTransactions();
   }, []);
 
-  // Lọc dữ liệu
+  // Lọc dữ liệu theo Loại, Thời gian và Từ khóa
   const filteredTransactions = useMemo(() => {
+    const now = new Date();
+    let startDate: Date;
+    let endDate: Date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    if (dateFilter === "this_week") {
+      const d = new Date(now);
+      const day = d.getDay();
+      // Thứ 2 là ngày đầu tuần
+      const diffToMonday = d.getDate() - day + (day === 0 ? -6 : 1);
+      d.setDate(diffToMonday);
+      d.setHours(0, 0, 0, 0);
+      startDate = d;
+    } else if (dateFilter === "this_month") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    } else if (dateFilter === "this_year") {
+      startDate = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
+    } else {
+      startDate = customStartDate ? new Date(customStartDate) : new Date(0);
+      startDate.setHours(0, 0, 0, 0);
+      if (customEndDate) {
+        endDate = new Date(customEndDate);
+        endDate.setHours(23, 59, 59, 999);
+      }
+    }
+
     return transactions.filter((tx) => {
+      // 1. Lọc theo Loại Thu / Chi
       const matchType = filterType === "all" ? true : tx.type === filterType;
+
+      // 2. Lọc theo Khoảng thời gian
+      const rawDate = tx.created_at || tx.date;
+      let matchDate = true;
+      if (rawDate) {
+        const txDate = new Date(rawDate);
+        matchDate = txDate >= startDate && txDate <= endDate;
+      }
+
+      // 3. Lọc theo từ khóa tìm kiếm
       const noteStr = String(
-        tx.note || tx.description || tx.categories?.name || ""
+        tx.note || tx.description || tx.categories?.name || tx.wallets?.name || ""
       ).toLowerCase();
       const queryStr = searchQuery.toLowerCase().trim();
+      const matchQuery = noteStr.includes(queryStr);
 
-      return matchType && noteStr.includes(queryStr);
+      return matchType && matchDate && matchQuery;
     });
-  }, [transactions, filterType, searchQuery]);
+  }, [transactions, filterType, dateFilter, customStartDate, customEndDate, searchQuery]);
 
   // Tổng số dư / thu / chi trong kết quả lọc
   const summaryMetrics = useMemo(() => {
@@ -189,7 +237,7 @@ export function HistoryPage() {
   return (
     <div className="mx-auto w-full max-w-md md:max-w-3xl lg:max-w-5xl space-y-5 bg-[#F8F9FA] px-3.5 sm:px-6 py-4 pb-32 md:pb-12 font-['Be_Vietnam_Pro'] min-h-screen">
       {/* 1. Header Trang */}
-      <section className="flex items-center justify-between pb-3 border-b border-slate-200">
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-3">
         <div>
           <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
             <History className="h-5 w-5 text-primary" /> Lịch sử giao dịch
@@ -198,9 +246,103 @@ export function HistoryPage() {
             Quản lý và tra cứu thông tin chi tiêu của bạn
           </p>
         </div>
+
+        {/* BỘ LỌC THỜI GIAN (Tuần này, Tháng này, Năm này, Tùy chỉnh) */}
+        <div className="flex flex-wrap items-center gap-1 bg-slate-200/70 p-1 rounded-2xl text-xs font-bold">
+          <button
+            type="button"
+            onClick={() => {
+              setDateFilter("this_week");
+              setCurrentPage(1);
+            }}
+            className={cn(
+              "px-3 py-1.5 rounded-xl transition-all",
+              dateFilter === "this_week"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-900"
+            )}
+          >
+            Tuần này
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setDateFilter("this_month");
+              setCurrentPage(1);
+            }}
+            className={cn(
+              "px-3 py-1.5 rounded-xl transition-all",
+              dateFilter === "this_month"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-900"
+            )}
+          >
+            Tháng này
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setDateFilter("this_year");
+              setCurrentPage(1);
+            }}
+            className={cn(
+              "px-3 py-1.5 rounded-xl transition-all",
+              dateFilter === "this_year"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-900"
+            )}
+          >
+            Năm này
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setDateFilter("custom");
+              setCurrentPage(1);
+            }}
+            className={cn(
+              "px-3 py-1.5 rounded-xl transition-all",
+              dateFilter === "custom"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-900"
+            )}
+          >
+            Tùy chỉnh
+          </button>
+        </div>
       </section>
 
-      {/* 2. Thẻ Tóm Tắt Dòng Tiền (Nhanh) */}
+      {/* TÙY CHỌN KHOẢNG THỜI GIAN TÙY Ý */}
+      {dateFilter === "custom" && (
+        <div className="flex flex-wrap items-center gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm animate-in fade-in duration-150">
+          <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+            <span className="text-xs font-bold text-slate-500">Từ:</span>
+            <input
+              type="date"
+              value={customStartDate}
+              onChange={(e) => {
+                setCustomStartDate(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full rounded-xl border border-slate-200 p-2 text-xs font-bold text-slate-900 bg-[#F8F9FA] focus:outline-none focus:border-primary"
+            />
+          </div>
+          <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+            <span className="text-xs font-bold text-slate-500">Đến:</span>
+            <input
+              type="date"
+              value={customEndDate}
+              onChange={(e) => {
+                setCustomEndDate(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full rounded-xl border border-slate-200 p-2 text-xs font-bold text-slate-900 bg-[#F8F9FA] focus:outline-none focus:border-primary"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 2. Thẻ Tóm Tắt Dòng Tiền */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div className="rounded-[20px] bg-white border border-slate-200/80 p-3.5 shadow-sm">
           <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
@@ -236,13 +378,13 @@ export function HistoryPage() {
         </div>
       </div>
 
-      {/* 3. Tìm kiếm & Bộ lọc */}
+      {/* 3. Tìm kiếm & Bộ lọc Loại Giao Dịch */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
         <div className="relative sm:col-span-7">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
             type="text"
-            placeholder="Tìm kiếm theo ghi chú, danh mục..."
+            placeholder="Tìm kiếm theo ghi chú, danh mục, ví..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -293,7 +435,7 @@ export function HistoryPage() {
             </div>
             <p className="text-xs font-bold text-slate-700">Không tìm thấy giao dịch nào</p>
             <p className="text-[11px] font-medium text-slate-400">
-              Thử thay đổi từ khóa tìm kiếm hoặc đổi bộ lọc xem sao.
+              Thử thay đổi từ khóa tìm kiếm hoặc đổi bộ lọc thời gian xem sao.
             </p>
           </div>
         ) : (
@@ -365,7 +507,7 @@ export function HistoryPage() {
                           {isIncome ? "+" : "-"}{formatVND(Number(tx.amount || 0))}
                         </span>
 
-                        {/* Nút tác vụ (Hiện trên Hover ở màn rộng) */}
+                        {/* Nút tác vụ (Sửa / Xóa) */}
                         <div className="flex items-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleOpenEdit(tx)}
@@ -421,7 +563,7 @@ export function HistoryPage() {
         </div>
       )}
 
-      {/* 6. Modal Xoá (Shadcn Dialog Chuẩn) */}
+      {/* 6. Modal Xoá */}
       <Dialog open={!!deletingTxId} onOpenChange={(v) => !v && setDeletingTxId(null)}>
         <DialogContent className="sm:max-w-sm rounded-[26px] bg-white p-6 font-['Be_Vietnam_Pro'] border-slate-200">
           <div className="flex flex-col items-center text-center space-y-3">
@@ -457,7 +599,7 @@ export function HistoryPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 7. Modal Sửa (Shadcn Dialog Chuẩn) */}
+      {/* 7. Modal Sửa */}
       <Dialog open={!!editingTx} onOpenChange={(v) => !v && setEditingTx(null)}>
         <DialogContent className="sm:max-w-sm rounded-[26px] bg-white p-6 font-['Be_Vietnam_Pro'] border-slate-200">
           <DialogHeader>
