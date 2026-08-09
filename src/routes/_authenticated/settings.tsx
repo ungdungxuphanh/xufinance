@@ -137,7 +137,7 @@ function SettingsPage() {
       <section className="flex items-center justify-between pb-3.5 border-b border-slate-200/80">
         <div>
           <h1 className="text-lg sm:text-2xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-slate-900 text-white">
+            <div className="p-2 rounded-xl bg-primary text-primary-foreground">
               <Settings className="h-5 w-5" />
             </div>
             Cài đặt tài khoản
@@ -253,7 +253,7 @@ function SettingsPage() {
                     onClick={() => handleSelectThemeColor(item.value)}
                     className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs font-bold transition-all ${
                       isSelected
-                        ? "border-slate-900 bg-slate-50 shadow-sm"
+                        ? "border-primary bg-primary/10 text-primary shadow-sm"
                         : "border-slate-200/80 bg-[#F8F9FA] text-slate-600 hover:border-slate-300"
                     }`}
                   >
@@ -334,7 +334,7 @@ function SettingsPage() {
             <Button
               type="submit"
               disabled={isUpdatingPassword}
-              className="w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm py-2.5 h-auto transition-all mt-2"
+              className="w-full rounded-full bg-primary hover:opacity-90 text-primary-foreground font-bold text-xs sm:text-sm py-2.5 h-auto transition-all mt-2"
             >
               {isUpdatingPassword ? (
                 <span className="flex items-center gap-2">

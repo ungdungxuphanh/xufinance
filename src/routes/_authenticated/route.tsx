@@ -21,10 +21,11 @@ function AppLayout() {
     // 🎨 1. Tải màu đã lưu trong localStorage và áp dụng cho toàn bộ App khi truy cập
     const savedTheme = localStorage.getItem("app_theme_color");
     if (savedTheme) {
-      document.documentElement.style.setProperty("--primary", savedTheme);
-      document.documentElement.style.setProperty("--ring", savedTheme);
-      document.documentElement.style.setProperty("--sidebar-primary", savedTheme);
-      document.documentElement.style.setProperty("--chart-1", savedTheme);
+      const root = document.documentElement;
+      root.style.setProperty("--primary", savedTheme);
+      root.style.setProperty("--ring", savedTheme);
+      root.style.setProperty("--sidebar-primary", savedTheme);
+      root.style.setProperty("--chart-1", savedTheme);
     }
 
     void supabase.rpc("bootstrap_user", {});

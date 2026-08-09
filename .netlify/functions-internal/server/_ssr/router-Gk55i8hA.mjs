@@ -953,8 +953,7 @@ function BudgetsPage() {
 									children: PRESET_ICONS.map((icon) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 										type: "button",
 										onClick: () => setFormIcon(icon),
-										className: `h-9 w-9 rounded-xl text-base flex items-center justify-center shrink-0 border transition-all ${formIcon === icon ? "border-[#16181D] bg-[#F3F4F1]" : "border-transparent hover:bg-[#F3F4F1]/50"}`,
-										children: icon
+className: `h-9 w-9 rounded-xl text-base flex items-center justify-center shrink-0 border transition-all ${formIcon === icon ? "border-primary bg-primary/10 text-primary" : "border-transparent hover:bg-[#F3F4F1]/50"}`,										children: icon
 									}, icon))
 								})]
 							})]
@@ -1008,7 +1007,7 @@ function BudgetsPage() {
 								children: PRESET_COLORS.map((color) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 									type: "button",
 									onClick: () => setFormColor(color),
-									className: `h-7 w-7 rounded-full border-2 transition-transform active:scale-90 ${formColor === color ? "scale-110 border-[#16181D]" : "border-transparent"}`,
+									className: `h-7 w-7 rounded-full border-2 transition-transform active:scale-90 ${formColor === color ? "scale-110 border-primary" : "border-transparent"}`,
 									style: { backgroundColor: color }
 								}, color))
 							})]
@@ -1257,7 +1256,7 @@ function IconColorPicker({ icon, color, setIcon, setColor }) {
 				type: "button",
 				onClick: () => setColor(c),
 				style: { backgroundColor: c },
-				className: cn("h-7 w-7 rounded-full ring-offset-2 ring-offset-background transition-all active:scale-90", color === c && "ring-2 ring-[#16181D]"),
+				className: cn("h-7 w-7 rounded-full ring-offset-2 ring-offset-background transition-all active:scale-90", color === c && "ring-2 ring-primary"),
 				"aria-label": `Màu ${c}`
 			}, c))
 		})]
@@ -1271,8 +1270,7 @@ function IconColorPicker({ icon, color, setIcon, setColor }) {
 			children: ICON_NAMES.map((n) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 				type: "button",
 				onClick: () => setIcon(n),
-				className: cn("flex h-9 items-center justify-center rounded-lg border transition-all active:scale-90", icon === n ? "border-[#16181D] bg-white text-primary shadow-sm" : "border-transparent text-[#8A8D7A] hover:bg-white/50"),
-				"aria-label": n,
+className: `h-9 w-9 rounded-xl text-base flex items-center justify-center shrink-0 border transition-all ${formIcon === icon ? "border-primary bg-primary/10 text-primary" : "border-transparent hover:bg-[#F3F4F1]/50"}`,				"aria-label": n,
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, {
 					name: n,
 					className: "h-4 w-4"

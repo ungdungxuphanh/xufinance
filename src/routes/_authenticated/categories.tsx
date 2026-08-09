@@ -239,7 +239,7 @@ function CategoriesPage() {
                   <Button
                     type="submit"
                     size="icon"
-                    className="h-9 w-9 shrink-0 rounded-xl bg-slate-900 hover:bg-slate-800 text-white transition-all"
+                    className="h-9 w-9 shrink-0 rounded-xl bg-primary hover:opacity-90 text-primary-foreground transition-all"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
