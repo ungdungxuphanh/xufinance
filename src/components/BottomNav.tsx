@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Trang chủ", icon: LayoutDashboard },
-  { to: "/wallets", label: "Ví", icon: Wallet },
+  { to: "/summary", label: "Ví", icon: Wallet },
   { to: "/budgets", label: "Quỹ", icon: PiggyBank },
   { to: "/history", label: "Lịch sử", icon: History },
   { to: "/categories", label: "Phân loại", icon: PieChart },
