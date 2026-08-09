@@ -763,14 +763,14 @@ function BudgetsPage() {
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 				className: "flex items-center justify-between pb-3 border-b border-[#E3E2DC]",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-					className: "text-lg sm:text-xl font-extrabold tracking-tight text-[#16181D]",
+					className: "text-lg sm:text-xl font-extrabold tracking-tight text-primary",
 					children: "Quỹ & Ngân sách"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-xs font-medium text-[#8A8D7A]",
 					children: "Tích lũy mục tiêu và quản lý khoản tiết kiệm"
 				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
 					onClick: handleOpenCreateModal,
-					className: "rounded-full bg-[#16181D] hover:bg-[#2A2E37] text-white font-bold text-xs sm:text-sm px-4 py-2 h-auto shadow-sm transition-all",
+					className: "rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-white font-bold text-xs sm:text-sm px-4 py-2 h-auto shadow-sm transition-all",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "mr-1.5 h-4 w-4" }), " Tạo quỹ"]
 				})]
 			}),
@@ -786,7 +786,7 @@ function BudgetsPage() {
 								className: "flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#8A8D7A]",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PiggyBank, { className: "h-4 w-4 text-[#D8A13B]" }), "Tổng tiền cất trong Quỹ"]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "mt-2 font-['JetBrains_Mono'] text-3xl sm:text-4xl font-bold leading-none tabular-nums text-[#16181D]",
+								className: "mt-2 font-['JetBrains_Mono'] text-3xl sm:text-4xl font-bold leading-none tabular-nums text-primary",
 								children: formatVND(totalInFunds)
 							})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FBEFD7] rotate-6 text-[#B4832B]",
@@ -801,19 +801,19 @@ function BudgetsPage() {
 										className: "text-[#8A8D7A] flex items-center gap-1",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Target, { className: "h-3.5 w-3.5" }), " Tổng mục tiêu"]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "font-['JetBrains_Mono'] text-[#16181D]",
+										className: "font-['JetBrains_Mono'] text-primary",
 										children: formatVND(totalTarget)
 									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 									className: "h-2 w-full rounded-full bg-[#F3F4F1] overflow-hidden",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "h-full rounded-full bg-[#109C7C] transition-all duration-500",
+										className: "h-full rounded-full bg-primary transition-all duration-500",
 										style: { width: `${overallProgress}%` }
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									className: "text-[11px] font-semibold text-right text-[#109C7C]",
+									className: "text-[11px] font-semibold text-right text-primary",
 									children: [
 										"Đã đạt ",
 										overallProgress,
@@ -828,7 +828,7 @@ function BudgetsPage() {
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "flex items-center justify-between px-1",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
-							className: "text-sm sm:text-base font-extrabold text-[#16181D]",
+							className: "text-sm sm:text-base font-extrabold text-primary",
 							children: [
 								"Danh sách quỹ (",
 								funds.length,
@@ -858,11 +858,11 @@ function BudgetsPage() {
 												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 													className: "flex items-center gap-1.5",
 													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-														className: "truncate text-xs sm:text-sm font-extrabold text-[#16181D]",
+														className: "truncate text-xs sm:text-sm font-extrabold text-primary",
 														children: fund.name
 													}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 														onClick: () => handleOpenEditModal(fund),
-														className: "text-[#8A8D7A] hover:text-[#16181D] transition-colors p-0.5",
+														className: "text-[#8A8D7A] hover:text-primary transition-colors p-0.5",
 														"aria-label": "Sửa quỹ",
 														children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "h-3.5 w-3.5" })
 													})]
@@ -888,7 +888,7 @@ function BudgetsPage() {
 										},
 										variant: "outline",
 										size: "sm",
-										className: "rounded-full border-[#E3E2DC] bg-[#F9F9F8] hover:bg-[#EAE9E3] text-[11px] sm:text-xs font-bold text-[#16181D] gap-1 shrink-0 h-8 px-2.5",
+										className: "rounded-full border-[#E3E2DC] bg-[#F9F9F8] hover:bg-[#EAE9E3] text-[11px] sm:text-xs font-bold text-primary gap-1 shrink-0 h-8 px-2.5",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRightLeft, { className: "h-3.5 w-3.5 text-[#8A8D7A]" }), " Chuyển"]
 									})]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -927,7 +927,7 @@ function BudgetsPage() {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center justify-between border-b pb-3 border-[#E3E2DC]",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-base font-extrabold text-[#16181D]",
+								className: "text-base font-extrabold text-primary",
 								children: editingFund ? "Chỉnh sửa Quỹ" : "Tạo Quỹ mới"
 							}), editingFund && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								type: "button",
@@ -939,7 +939,7 @@ function BudgetsPage() {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "space-y-1.5",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "text-xs font-bold text-[#16181D]",
+								className: "text-xs font-bold text-primary",
 								children: "Biểu tượng (Icon)"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-2",
@@ -962,7 +962,7 @@ function BudgetsPage() {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "space-y-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "text-xs font-bold text-[#16181D]",
+								className: "text-xs font-bold text-primary",
 								children: "Tên Quỹ"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 								type: "text",
@@ -970,38 +970,38 @@ function BudgetsPage() {
 								value: formName,
 								onChange: (e) => setFormName(e.target.value),
 								required: true,
-								className: "w-full rounded-xl border border-[#EDECE6] p-2.5 text-xs sm:text-sm font-bold text-[#16181D] bg-[#F3F4F1] focus:outline-none"
+								className: "w-full rounded-xl border border-[#EDECE6] p-2.5 text-xs sm:text-sm font-bold text-primary bg-[#F3F4F1] focus:outline-none"
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "space-y-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "text-xs font-bold text-[#16181D]",
+								className: "text-xs font-bold text-primary",
 								children: "Mục tiêu (VNĐ)"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 								type: "number",
 								placeholder: "0",
 								value: formTarget,
 								onChange: (e) => setFormTarget(e.target.value),
-								className: "w-full rounded-xl border border-[#EDECE6] p-2.5 font-['JetBrains_Mono'] text-xs sm:text-sm font-bold text-[#16181D] bg-[#F3F4F1] focus:outline-none"
+								className: "w-full rounded-xl border border-[#EDECE6] p-2.5 font-['JetBrains_Mono'] text-xs sm:text-sm font-bold text-primary bg-[#F3F4F1] focus:outline-none"
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "space-y-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "text-xs font-bold text-[#16181D]",
+								className: "text-xs font-bold text-primary",
 								children: "Thời hạn hoàn thành (Không bắt buộc)"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 								type: "date",
 								value: formDeadline,
 								onChange: (e) => setFormDeadline(e.target.value),
-								className: "w-full rounded-xl border border-[#EDECE6] p-2.5 text-xs font-bold text-[#16181D] bg-[#F3F4F1] focus:outline-none"
+								className: "w-full rounded-xl border border-[#EDECE6] p-2.5 text-xs font-bold text-primary bg-[#F3F4F1] focus:outline-none"
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "space-y-1.5",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "text-xs font-bold text-[#16181D]",
+								className: "text-xs font-bold text-primary",
 								children: "Màu sắc chủ đạo"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "flex gap-2.5",
@@ -1023,7 +1023,7 @@ function BudgetsPage() {
 								children: "Hủy"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 								type: "submit",
-								className: "flex-1 rounded-full bg-[#16181D] text-xs font-bold text-white hover:bg-[#2A2E37]",
+								className: "flex-1 rounded-full bg-primary text-primary-foreground text-xs font-bold text-white hover:bg-primary/90",
 								children: editingFund ? "Cập nhật" : "Tạo quỹ"
 							})]
 						})
@@ -1042,7 +1042,7 @@ function BudgetsPage() {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "space-y-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
-								className: "text-base font-extrabold text-[#16181D]",
+								className: "text-base font-extrabold text-primary",
 								children: [
 									"Xoá quỹ \"",
 									editingFund.name,
@@ -1080,7 +1080,7 @@ function BudgetsPage() {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "flex items-center justify-between border-b pb-3 border-[#E3E2DC]",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-								className: "text-base font-extrabold text-[#16181D]",
+								className: "text-base font-extrabold text-primary",
 								children: ["Chuyển tiền — ", selectedFundForTransfer.name]
 							})
 						}),
@@ -1089,25 +1089,25 @@ function BudgetsPage() {
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								type: "button",
 								onClick: () => setTransferType("in"),
-								className: `flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full text-xs font-bold transition-all ${transferType === "in" ? "bg-[#16181D] text-white shadow-sm" : "text-[#8A8D7A]"}`,
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDownRight, { className: "h-3.5 w-3.5 text-[#109C7C]" }), " Cất vào Quỹ"]
+								className: `flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full text-xs font-bold transition-all ${transferType === "in" ? "bg-primary text-primary-foreground text-white shadow-sm" : "text-[#8A8D7A]"}`,
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDownRight, { className: "h-3.5 w-3.5 text-primary" }), " Cất vào Quỹ"]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								type: "button",
 								onClick: () => setTransferType("out"),
-								className: `flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full text-xs font-bold transition-all ${transferType === "out" ? "bg-[#16181D] text-white shadow-sm" : "text-[#8A8D7A]"}`,
+								className: `flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full text-xs font-bold transition-all ${transferType === "out" ? "bg-primary text-primary-foreground text-white shadow-sm" : "text-[#8A8D7A]"}`,
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpRight, { className: "h-3.5 w-3.5 text-[#EF5B45]" }), " Rút về Ví"]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "space-y-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-								className: "text-xs font-bold text-[#16181D] flex items-center gap-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wallet, { className: "h-3.5 w-3.5 text-[#109C7C]" }), " Chọn Ví giao dịch"]
+								className: "text-xs font-bold text-primary flex items-center gap-1",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wallet, { className: "h-3.5 w-3.5 text-primary" }), " Chọn Ví giao dịch"]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
 								value: selectedWalletId,
 								onChange: (e) => setSelectedWalletId(e.target.value),
 								required: true,
-								className: "w-full rounded-xl border border-[#EDECE6] p-2.5 text-xs sm:text-sm font-bold text-[#16181D] bg-[#F3F4F1] focus:outline-none",
+								className: "w-full rounded-xl border border-[#EDECE6] p-2.5 text-xs sm:text-sm font-bold text-primary bg-[#F3F4F1] focus:outline-none",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 									value: "",
 									children: "-- Chọn Ví --"
@@ -1125,7 +1125,7 @@ function BudgetsPage() {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "space-y-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "text-xs font-bold text-[#16181D]",
+								className: "text-xs font-bold text-primary",
 								children: "Số tiền (VNĐ)"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 								type: "number",
@@ -1133,7 +1133,7 @@ function BudgetsPage() {
 								value: amountInput,
 								onChange: (e) => setAmountInput(e.target.value),
 								required: true,
-								className: "w-full rounded-xl border border-[#EDECE6] p-2.5 font-['JetBrains_Mono'] text-base font-bold text-[#16181D] bg-[#F3F4F1] focus:outline-none"
+								className: "w-full rounded-xl border border-[#EDECE6] p-2.5 font-['JetBrains_Mono'] text-base font-bold text-primary bg-[#F3F4F1] focus:outline-none"
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -1146,7 +1146,7 @@ function BudgetsPage() {
 								children: "Hủy"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 								type: "submit",
-								className: "flex-1 rounded-full bg-[#109C7C] text-xs font-bold text-white hover:bg-[#0E8569]",
+								className: "flex-1 rounded-full bg-primary text-xs font-bold text-white hover:bg-[#0E8569]",
 								children: "Xác nhận"
 							})]
 						})
@@ -1249,7 +1249,7 @@ function IconColorPicker({ icon, color, setIcon, setColor }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "space-y-1.5",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-			className: "text-xs font-bold text-[#16181D]",
+			className: "text-xs font-bold text-primary",
 			children: "Màu sắc"
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "flex flex-wrap gap-2",
@@ -1264,14 +1264,14 @@ function IconColorPicker({ icon, color, setIcon, setColor }) {
 	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "space-y-1.5",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-			className: "text-xs font-bold text-[#16181D]",
+			className: "text-xs font-bold text-primary",
 			children: "Biểu tượng"
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "grid max-h-32 grid-cols-8 gap-1.5 overflow-y-auto p-1 bg-[#F3F4F1] rounded-xl border border-[#EDECE6]",
 			children: ICON_NAMES.map((n) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 				type: "button",
 				onClick: () => setIcon(n),
-				className: cn("flex h-9 items-center justify-center rounded-lg border transition-all active:scale-90", icon === n ? "border-[#16181D] bg-white text-[#16181D] shadow-sm" : "border-transparent text-[#8A8D7A] hover:bg-white/50"),
+				className: cn("flex h-9 items-center justify-center rounded-lg border transition-all active:scale-90", icon === n ? "border-[#16181D] bg-white text-primary shadow-sm" : "border-transparent text-[#8A8D7A] hover:bg-white/50"),
 				"aria-label": n,
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, {
 					name: n,

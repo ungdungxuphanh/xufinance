@@ -44,7 +44,7 @@ function BottomNav() {
 			const isActive = location.pathname === item.to;
 			return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
 				to: item.to,
-				className: cn("flex flex-col items-center gap-1 rounded-full px-3.5 py-2 text-[11px] font-bold transition-all", isActive ? "bg-[#EAE9E3] text-[#16181D]" : "text-[#8A8D7A] hover:text-[#16181D]"),
+				className: cn("flex flex-col items-center gap-1 rounded-full px-3.5 py-2 text-[11px] font-bold transition-all", isActive ? "bg-[#EAE9E3] text-primary" : "text-[#8A8D7A] hover:text-primary"),
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "h-5 w-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.label })]
 			}, item.to);
 		})

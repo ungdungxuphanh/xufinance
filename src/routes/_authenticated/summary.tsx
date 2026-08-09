@@ -1,7 +1,21 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Wallet as WalletIcon, PieChart, Coins, AlertTriangle } from "lucide-react";
+import {
+  Pencil,
+  Plus,
+  Trash2,
+  Wallet as WalletIcon,
+  PieChart,
+  Coins,
+  AlertTriangle,
+  ArrowUpRight,
+  ArrowDownRight,
+  Sparkles,
+  LayoutGrid,
+  List,
+  Inbox,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +59,9 @@ function SummaryPage() {
   const [editing, setEditing] = useState<Wallet | null>(null);
   const [open, setOpen] = useState(false);
 
+  // Chế độ xem: 'grid' hoặc 'list'
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
   // State quản lý Modal xác nhận xóa ví
   const [deletingWallet, setDeletingWallet] = useState<Wallet | null>(null);
 
@@ -67,6 +84,17 @@ function SummaryPage() {
     () => wallets.reduce((sum, w) => sum + (balances.get(w.id) ?? 0), 0),
     [wallets, balances]
   );
+
+  // Tính tổng Thu & Tổng Chi
+  const { totalIncome, totalExpense } = useMemo(() => {
+    let inc = 0;
+    let exp = 0;
+    for (const t of txs) {
+      if (t.type === "income") inc += t.amount;
+      if (t.type === "expense") exp += t.amount;
+    }
+    return { totalIncome: inc, totalExpense: exp };
+  }, [txs]);
 
   // Thống kê chi tiêu theo từng danh mục
   const byCategory = useMemo(() => {
@@ -95,16 +123,16 @@ function SummaryPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-md md:max-w-3xl lg:max-w-6xl space-y-6 bg-[#F3F4F1] px-3.5 sm:px-6 py-4 pb-32 md:pb-12 font-['Be_Vietnam_Pro'] min-h-screen">
+    <div className="mx-auto w-full max-w-md md:max-w-3xl lg:max-w-6xl space-y-5 bg-[#F8F9FA] px-3.5 sm:px-6 py-4 pb-32 md:pb-12 font-['Be_Vietnam_Pro'] min-h-screen">
       
       {/* 1. Header Trang Tóm Tắt */}
-      <section className="flex items-center justify-between pb-3 border-b border-[#E3E2DC]">
+      <section className="flex items-center justify-between pb-3 border-b border-slate-200">
         <div>
-          <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-[#16181D]">
+          <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
             Tóm tắt tài chính
           </h1>
-          <p className="text-xs font-medium text-[#8A8D7A]">
-            Quản lý ví và phân tích chi tiêu
+          <p className="text-xs font-medium text-slate-500">
+            Quản lý ví và phân tích dòng tiền tổng quan
           </p>
         </div>
         <Button
@@ -112,71 +140,199 @@ function SummaryPage() {
             setEditing(null);
             setOpen(true);
           }}
-          className="rounded-full bg-[#16181D] hover:bg-[#2A2E37] text-white font-bold text-xs sm:text-sm px-4 py-2 h-auto shadow-sm transition-all"
+          className="rounded-full bg-primary hover:bg-[#0E8A6E] text-white font-bold text-xs sm:text-sm px-4 py-2 h-auto shadow-sm transition-all"
         >
           <Plus className="mr-1.5 h-4 w-4" /> Thêm ví
         </Button>
       </section>
 
-      {/* 2. Hero Card Tổng Tài Sản */}
-      <section className="relative rounded-[26px] bg-white border border-[#E7E5DC] shadow-sm pt-6 pb-5 px-6 overflow-hidden">
-        <div className="flex items-start justify-between">
-          <div>
-            <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#8A8D7A]">
-              <Coins className="h-4 w-4 text-[#D8A13B]" />
-              Tổng tài sản thực tế
+      {/* 2. Hero Cards Tổng Quan */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        <div className="rounded-[22px] bg-white border border-slate-200/80 shadow-sm p-4 flex flex-col justify-between">
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <Coins className="h-3.5 w-3.5 text-primary" />
+                Tổng tài sản thực tế
+              </span>
+              <p className="mt-1.5 font-['JetBrains_Mono'] text-2xl font-bold leading-none tabular-nums text-slate-900">
+                {formatVND(total)}
+              </p>
+            </div>
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-primary">
+              <WalletIcon className="h-4.5 w-4.5" />
             </span>
-            <p className="mt-2 font-['JetBrains_Mono'] text-3xl sm:text-4xl font-bold leading-none tabular-nums text-[#16181D]">
-              {formatVND(total)}
-            </p>
           </div>
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FBEFD7] rotate-6 text-[#B4832B]">
-            <WalletIcon className="h-6 w-6" />
-          </span>
+          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center gap-1 text-[11px] font-bold text-slate-500">
+            <Sparkles className="h-3.5 w-3.5 text-amber-500" /> Tổng từ {wallets.length} ví
+          </div>
         </div>
-      </section>
 
-      {/* 3. Bố cục Grid Responsive */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="rounded-[22px] bg-white border border-slate-200/80 shadow-sm p-4 flex flex-col justify-between">
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <ArrowDownRight className="h-3.5 w-3.5 text-emerald-600" />
+                Tổng thu nhập
+              </span>
+              <p className="mt-1.5 font-['JetBrains_Mono'] text-2xl font-bold leading-none tabular-nums text-emerald-600">
+                {formatVND(totalIncome)}
+              </p>
+            </div>
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+              <ArrowDownRight className="h-4.5 w-4.5" />
+            </span>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] font-semibold text-slate-500">
+            Tổng dòng tiền vào
+          </div>
+        </div>
+
+        <div className="rounded-[22px] bg-white border border-slate-200/80 shadow-sm p-4 flex flex-col justify-between">
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <ArrowUpRight className="h-3.5 w-3.5 text-[#EF5B45]" />
+                Tổng đã chi
+              </span>
+              <p className="mt-1.5 font-['JetBrains_Mono'] text-2xl font-bold leading-none tabular-nums text-slate-900">
+                {formatVND(totalExpense)}
+              </p>
+            </div>
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-[#EF5B45]">
+              <ArrowUpRight className="h-4.5 w-4.5" />
+            </span>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] font-semibold text-slate-500">
+            Tổng dòng tiền ra
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Bố cục Grid / List (Được lấp đầy 2 cột cân đối) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         
-        {/* CỘT BÊN TRÁI: Danh sách Ví */}
-        <section className="lg:col-span-7 xl:col-span-7 space-y-3">
+        {/* CỘT BÊN TRÁI: Danh sách Ví (Chiếm 7/12 cột) */}
+        <section className="lg:col-span-7 space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-sm sm:text-base font-extrabold text-[#16181D] flex items-center gap-2">
-              <WalletIcon className="h-4.5 w-4.5 text-[#109C7C]" />
+            <h2 className="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <WalletIcon className="h-4 w-4 text-primary" />
               Ví của bạn ({wallets.length})
             </h2>
+
+            {/* Nút Chuyển Đổi Chế Độ View: Grid / List */}
+            <div className="flex items-center rounded-lg bg-slate-200/60 p-0.5">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={cn(
+                  "flex items-center justify-center rounded-md p-1.5 text-xs font-semibold transition-all",
+                  viewMode === "grid"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-900"
+                )}
+                aria-label="Chế độ lưới"
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={cn(
+                  "flex items-center justify-center rounded-md p-1.5 text-xs font-semibold transition-all",
+                  viewMode === "list"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-900"
+                )}
+                aria-label="Chế độ danh sách"
+              >
+                <List className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
-            {wallets.length === 0 ? (
-              <div className="col-span-full rounded-[22px] border border-dashed border-[#D8D6CC] bg-white p-8 text-center text-xs font-bold text-[#8A8D7A]">
-                Chưa có ví nào trong tài khoản — Bấm "+ Thêm ví" để bắt đầu
-              </div>
-            ) : (
-              wallets.map((w) => (
+          {/* Dạng hiển thị động dựa vào state viewMode */}
+          {wallets.length === 0 ? (
+            <div className="rounded-[22px] border border-dashed border-slate-300 bg-white p-8 text-center text-xs font-bold text-slate-500">
+              Chưa có ví nào trong tài khoản — Bấm "+ Thêm ví" để bắt đầu
+            </div>
+          ) : viewMode === "grid" ? (
+            /* BIỂU DIỄN DẠNG LƯỚI (GRID) */
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {wallets.map((w) => (
                 <div
                   key={w.id}
-                  className="flex items-center justify-between rounded-[22px] bg-white border border-[#E7E5DC] p-4 shadow-sm hover:border-[#D8D6CC] transition-all"
+                  className="flex flex-col justify-between rounded-[20px] bg-white border border-slate-200/80 p-3.5 shadow-sm hover:border-slate-300 transition-all space-y-2.5"
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="flex items-center justify-between">
                     <span
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
                       style={{ backgroundColor: w.color || "#109C7C" }}
                     >
-                      <Icon name={w.icon || "Wallet"} className="h-5.5 w-5.5" />
+                      <Icon name={w.icon || "Wallet"} className="h-5 w-5" />
                     </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs sm:text-sm font-extrabold text-[#16181D]">
+                    <div className="flex items-center gap-0.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setEditing(w);
+                          setOpen(true);
+                        }}
+                        className="h-7 w-7 rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-100"
+                        aria-label="Sửa ví"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setDeletingWallet(w)}
+                        className="h-7 w-7 rounded-full text-slate-400 hover:text-[#EF5B45] hover:bg-rose-50"
+                        aria-label="Xoá ví"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-[#EF5B45]" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="truncate text-xs font-bold text-slate-500">
+                      {w.name}
+                    </p>
+                    <p className="font-['JetBrains_Mono'] text-base font-bold tabular-nums text-slate-900 mt-0.5">
+                      {formatVND(balances.get(w.id) ?? 0)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* BIỂU DIỄN DẠNG DANH SÁCH (LIST) */
+            <div className="rounded-[20px] bg-white border border-slate-200/80 shadow-sm divide-y divide-slate-100 overflow-hidden">
+              {wallets.map((w) => (
+                <div
+                  key={w.id}
+                  className="flex items-center justify-between p-3 sm:p-3.5 hover:bg-slate-50/80 transition-all"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
+                      style={{ backgroundColor: w.color || "#109C7C" }}
+                    >
+                      <Icon name={w.icon || "Wallet"} className="h-4.5 w-4.5" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-xs sm:text-sm font-extrabold text-slate-900">
                         {w.name}
                       </p>
-                      <p className="font-['JetBrains_Mono'] text-sm sm:text-base font-bold tabular-nums text-[#16181D]">
+                      <p className="font-['JetBrains_Mono'] text-xs font-bold tabular-nums text-slate-600">
                         {formatVND(balances.get(w.id) ?? 0)}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0 ml-2">
+                  <div className="flex items-center gap-0.5 shrink-0 ml-2">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -184,7 +340,7 @@ function SummaryPage() {
                         setEditing(w);
                         setOpen(true);
                       }}
-                      className="h-8 w-8 rounded-full text-[#8A8D7A] hover:text-[#16181D] hover:bg-[#F3F4F1]"
+                      className="h-7 w-7 rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-100"
                       aria-label="Sửa ví"
                     >
                       <Pencil className="h-3.5 w-3.5" />
@@ -193,92 +349,105 @@ function SummaryPage() {
                       variant="ghost"
                       size="icon"
                       onClick={() => setDeletingWallet(w)}
-                      className="h-8 w-8 rounded-full text-[#8A8D7A] hover:text-[#EF5B45] hover:bg-[#FCE4E0]"
+                      className="h-7 w-7 rounded-full text-slate-400 hover:text-[#EF5B45] hover:bg-rose-50"
                       aria-label="Xoá ví"
                     >
                       <Trash2 className="h-3.5 w-3.5 text-[#EF5B45]" />
                     </Button>
                   </div>
                 </div>
-              ))
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* CỘT BÊN PHẢI: Thống kê Chi tiêu theo Phân loại (Chiếm 5/12 cột, Luôn hiển thị) */}
+        <section className="lg:col-span-5 space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <PieChart className="h-4 w-4 text-[#EF5B45]" />
+              Chi tiêu theo phân loại
+            </h2>
+          </div>
+
+          <div className="rounded-[22px] border border-slate-200/80 bg-white p-4 shadow-sm">
+            {byCategory.list.length > 0 ? (
+              <div className="space-y-3.5">
+                {byCategory.list.map(({ category, amount }) => (
+                  <div key={category!.id} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                      <span className="flex items-center gap-2 font-bold text-slate-900">
+                        <span
+                          className="flex h-5.5 w-5.5 items-center justify-center rounded-lg"
+                          style={{ backgroundColor: `${category!.color}20`, color: category!.color }}
+                        >
+                          <Icon name={category!.icon} className="h-3.5 w-3.5" />
+                        </span>
+                        {category!.name}
+                      </span>
+                      <span className="font-['JetBrains_Mono'] font-bold text-slate-900 tabular-nums text-xs">
+                        {formatVND(amount)}
+                      </span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${Math.max(4, (amount / byCategory.max) * 100)}%`,
+                          backgroundColor: category!.color,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              /* TRẠNG THÁI TRỐNG KHI CHƯA CÓ GIAO DỊCH CHI TIÊU */
+              <div className="flex flex-col items-center justify-center text-center py-8 px-4 space-y-2">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                  <Inbox className="h-5 w-5" />
+                </div>
+                <p className="text-xs font-bold text-slate-700">Chưa có dữ liệu chi tiêu</p>
+                <p className="text-[11px] font-medium text-slate-400 max-w-[200px]">
+                  Các khoản chi theo danh mục sẽ tự động tổng hợp và hiển thị tại đây.
+                </p>
+              </div>
             )}
           </div>
         </section>
-
-        {/* CỘT BÊN PHẢI: Thống kê Chi tiêu theo Phân loại */}
-        {byCategory.list.length > 0 && (
-          <section className="lg:col-span-5 xl:col-span-5 space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h2 className="text-sm sm:text-base font-extrabold text-[#16181D] flex items-center gap-2">
-                <PieChart className="h-4.5 w-4.5 text-[#EF5B45]" />
-                Chi tiêu theo phân loại
-              </h2>
-            </div>
-
-            <div className="rounded-[26px] border border-[#E7E5DC] bg-white p-5 shadow-sm space-y-4">
-              {byCategory.list.map(({ category, amount }) => (
-                <div key={category!.id} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs sm:text-sm">
-                    <span className="flex items-center gap-2 font-bold text-[#16181D]">
-                      <span
-                        className="flex h-6 w-6 items-center justify-center rounded-lg"
-                        style={{ backgroundColor: `${category!.color}20`, color: category!.color }}
-                      >
-                        <Icon name={category!.icon} className="h-3.5 w-3.5" />
-                      </span>
-                      {category!.name}
-                    </span>
-                    <span className="font-['JetBrains_Mono'] font-bold text-[#16181D] tabular-nums">
-                      {formatVND(amount)}
-                    </span>
-                  </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-[#F3F4F1]">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${Math.max(4, (amount / byCategory.max) * 100)}%`,
-                        backgroundColor: category!.color,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
       </div>
 
       {/* Dialog Thêm/Sửa Ví */}
       <WalletDialog open={open} onOpenChange={setOpen} editing={editing} />
 
-      {/* Dialog XÁC NHẬN XÓA VÍ (Giao diện chuẩn Web) */}
+      {/* Dialog XÁC NHẬN XÓA VÍ */}
       <Dialog open={!!deletingWallet} onOpenChange={(v) => !v && setDeletingWallet(null)}>
-        <DialogContent className="sm:max-w-sm rounded-[26px] bg-white p-6 font-['Be_Vietnam_Pro'] border-[#E7E5DC]">
+        <DialogContent className="sm:max-w-sm rounded-[26px] bg-white p-6 font-['Be_Vietnam_Pro'] border-slate-200">
           <div className="flex flex-col items-center text-center space-y-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FCE4E0] text-[#EF5B45]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-[#EF5B45]">
               <AlertTriangle className="h-6 w-6" />
             </div>
             <DialogHeader>
-              <DialogTitle className="text-base font-extrabold text-[#16181D]">
+              <DialogTitle className="text-base font-extrabold text-slate-900">
                 Xác nhận xóa ví?
               </DialogTitle>
             </DialogHeader>
-            <p className="text-xs font-medium text-[#8A8D7A]">
-              Bạn có chắc chắn muốn xóa ví <span className="font-bold text-[#16181D]">"{deletingWallet?.name}"</span> không? Hành động này không thể hoàn tác.
+            <p className="text-xs font-medium text-slate-500">
+              Bạn có chắc chắn muốn xóa ví <span className="font-bold text-slate-900">"{deletingWallet?.name}"</span> không? Hành động này không thể hoàn tác.
             </p>
           </div>
 
           <div className="flex items-center gap-3 mt-4">
             <Button
               variant="outline"
-              className="flex-1 rounded-full border-[#EDECE6] font-bold text-xs py-2.5 h-auto text-[#16181D] hover:bg-[#F3F4F1]"
+              className="flex-1 rounded-full border-slate-200 font-bold text-xs py-2.5 h-auto text-slate-900 hover:bg-slate-100"
               onClick={() => setDeletingWallet(null)}
             >
               Hủy
             </Button>
             <Button
-              className="flex-1 rounded-full bg-[#EF5B45] hover:bg-[#d94a34] text-white font-bold text-xs py-2.5 h-auto transition-all"
+              className="flex-1 rounded-full bg-[#EF5B45] hover:bg-[#DC4C37] text-white font-bold text-xs py-2.5 h-auto transition-all"
               onClick={confirmDelete}
               disabled={del.isPending}
             >
@@ -311,9 +480,9 @@ function WalletDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md rounded-[26px] bg-white p-6 font-['Be_Vietnam_Pro'] border-[#E7E5DC]" key={key}>
+      <DialogContent className="sm:max-w-md rounded-[26px] bg-white p-6 font-['Be_Vietnam_Pro'] border-slate-200" key={key}>
         <DialogHeader>
-          <DialogTitle className="text-base font-extrabold text-[#16181D]">
+          <DialogTitle className="text-base font-extrabold text-slate-900">
             {editing ? "Sửa ví" : "Thêm ví mới"}
           </DialogTitle>
         </DialogHeader>
@@ -329,7 +498,7 @@ function WalletDialog({
           setInitial={setInitial}
         />
         <Button
-          className="w-full rounded-full bg-[#16181D] hover:bg-[#2A2E37] text-white font-bold py-2.5 h-auto transition-all mt-2"
+          className="w-full rounded-full bg-primary hover:bg-[#0E8A6E] text-white font-bold py-2.5 h-auto transition-all mt-2"
           onClick={async () => {
             if (!name.trim()) {
               toast.error("Nhập tên ví");
@@ -381,24 +550,24 @@ function WalletForm(props: {
   return (
     <div className="space-y-4 py-2">
       <div className="space-y-1.5">
-        <Label htmlFor="w-name" className="text-xs font-bold text-[#16181D]">Tên ví</Label>
+        <Label htmlFor="w-name" className="text-xs font-bold text-slate-900">Tên ví</Label>
         <Input
           id="w-name"
           value={props.name}
           maxLength={40}
           placeholder="Tiền mặt, Momo, BIDV..."
           onChange={(e) => props.setName(e.target.value)}
-          className="rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-[#16181D] font-medium text-xs sm:text-sm"
+          className="rounded-xl border-slate-200 bg-[#F8F9FA] focus-visible:ring-[#109C7C] font-medium text-xs sm:text-sm text-slate-900"
         />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="w-init" className="text-xs font-bold text-[#16181D]">Số dư ban đầu</Label>
+        <Label htmlFor="w-init" className="text-xs font-bold text-slate-900">Số dư ban đầu</Label>
         <Input
           id="w-init"
           type="number"
           value={props.initial}
           onChange={(e) => props.setInitial(e.target.value)}
-          className="rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-[#16181D] font-['JetBrains_Mono'] font-bold text-xs sm:text-sm"
+          className="rounded-xl border-slate-200 bg-[#F8F9FA] focus-visible:ring-[#109C7C] font-['JetBrains_Mono'] font-bold text-xs sm:text-sm text-slate-900"
         />
       </div>
       <IconColorPicker
@@ -425,7 +594,7 @@ export function IconColorPicker({
   return (
     <>
       <div className="space-y-1.5">
-        <Label className="text-xs font-bold text-[#16181D]">Màu sắc</Label>
+        <Label className="text-xs font-bold text-slate-900">Màu sắc</Label>
         <div className="flex flex-wrap gap-2">
           {PALETTE.map((c) => (
             <button
@@ -435,7 +604,7 @@ export function IconColorPicker({
               style={{ backgroundColor: c }}
               className={cn(
                 "h-7 w-7 rounded-full ring-offset-2 ring-offset-background transition-all active:scale-90",
-                color === c && "ring-2 ring-[#16181D]"
+                color === c && "ring-2 ring-slate-900"
               )}
               aria-label={`Màu ${c}`}
             />
@@ -443,8 +612,8 @@ export function IconColorPicker({
         </div>
       </div>
       <div className="space-y-1.5">
-        <Label className="text-xs font-bold text-[#16181D]">Biểu tượng</Label>
-        <div className="grid max-h-32 grid-cols-8 gap-1.5 overflow-y-auto p-1 bg-[#F3F4F1] rounded-xl border border-[#EDECE6]">
+        <Label className="text-xs font-bold text-slate-900">Biểu tượng</Label>
+        <div className="grid max-h-32 grid-cols-8 gap-1.5 overflow-y-auto p-1 bg-[#F8F9FA] rounded-xl border border-slate-200">
           {ICON_NAMES.map((n) => (
             <button
               key={n}
@@ -452,7 +621,7 @@ export function IconColorPicker({
               onClick={() => setIcon(n)}
               className={cn(
                 "flex h-9 items-center justify-center rounded-lg border transition-all active:scale-90",
-                icon === n ? "border-[#16181D] bg-white text-[#16181D] shadow-sm" : "border-transparent text-[#8A8D7A] hover:bg-white/50"
+                icon === n ? "border-slate-900 bg-white text-slate-900 shadow-sm" : "border-transparent text-slate-400 hover:bg-white/50"
               )}
               aria-label={n}
             >

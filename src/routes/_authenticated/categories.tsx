@@ -1,7 +1,17 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, X, Tags, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import {
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+  Tags,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Tag as TagIcon,
+  FolderPlus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,7 +50,7 @@ export const Route = createFileRoute("/_authenticated/categories")({
 });
 
 function CategoriesPage() {
-  const { data: categories = [] } = useCategories();
+  const { data: categories = [], isLoading: isLoadingCat } = useCategories();
   const { data: notes = [] } = useNotes();
   const del = useDeleteCategory();
   const delNote = useDeleteNote();
@@ -62,16 +72,19 @@ function CategoriesPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-md md:max-w-3xl lg:max-w-6xl space-y-6 bg-[#F3F4F1] px-3.5 sm:px-6 py-4 pb-32 md:pb-12 font-['Be_Vietnam_Pro'] min-h-screen">
+    <div className="mx-auto w-full max-w-md md:max-w-3xl lg:max-w-6xl space-y-6 bg-[#F8F9FA] px-3.5 sm:px-6 py-5 pb-32 md:pb-12 font-['Be_Vietnam_Pro'] min-h-screen">
       
       {/* 1. Header Trang Phân Loại */}
-      <section className="flex items-center justify-between pb-3 border-b border-[#E3E2DC]">
+      <section className="flex items-center justify-between pb-3.5 border-b border-slate-200/80">
         <div>
-          <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-[#16181D]">
+          <h1 className="text-lg sm:text-2xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-primary/10 text-primary">
+              <Tags className="h-5 w-5" />
+            </div>
             Phân loại thu chi
           </h1>
-          <p className="text-xs font-medium text-[#8A8D7A]">
-            Quản lý danh mục và thẻ ghi chú chi tiết
+          <p className="text-xs sm:text-sm font-medium text-slate-500 mt-0.5">
+            Quản lý danh mục và các thẻ ghi chú nhanh
           </p>
         </div>
         <Button
@@ -79,7 +92,7 @@ function CategoriesPage() {
             setEditing(null);
             setOpen(true);
           }}
-          className="rounded-full bg-[#16181D] hover:bg-[#2A2E37] text-white font-bold text-xs sm:text-sm px-4 py-2 h-auto shadow-sm transition-all"
+          className="rounded-full bg-primary hover:bg-[#0E8A6E] text-white font-bold text-xs sm:text-sm px-4 py-2.5 h-auto shadow-sm transition-all"
         >
           <Plus className="mr-1.5 h-4 w-4" /> Thêm danh mục
         </Button>
@@ -87,39 +100,52 @@ function CategoriesPage() {
 
       {/* 2. Thanh chuyển Tab Thu nhập / Chi tiêu */}
       <section className="flex justify-center sm:justify-start">
-        <div className="flex w-full sm:w-auto p-1 bg-[#EAE8E0] rounded-full border border-[#E3E2DC]">
+        <div className="flex w-full sm:w-auto p-1 bg-slate-200/70 rounded-full border border-slate-200">
           <button
             onClick={() => setTab("expense")}
             className={cn(
-              "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-6 py-2 rounded-full text-xs sm:text-sm font-bold transition-all",
+              "flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all",
               tab === "expense"
-                ? "bg-[#16181D] text-white shadow-sm"
-                : "text-[#8A8D7A] hover:text-[#16181D]"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-900"
             )}
           >
             <ArrowUpRight className={cn("h-4 w-4", tab === "expense" ? "text-[#EF5B45]" : "")} />
-            Khoản chi tiêu
+            Chi tiêu
           </button>
           <button
             onClick={() => setTab("income")}
             className={cn(
-              "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-6 py-2 rounded-full text-xs sm:text-sm font-bold transition-all",
+              "flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all",
               tab === "income"
-                ? "bg-[#16181D] text-white shadow-sm"
-                : "text-[#8A8D7A] hover:text-[#16181D]"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-900"
             )}
           >
-            <ArrowDownLeft className={cn("h-4 w-4", tab === "income" ? "text-[#109C7C]" : "")} />
-            Khoản thu nhập
+            <ArrowDownLeft className={cn("h-4 w-4", tab === "income" ? "text-primary" : "")} />
+            Thu nhập
           </button>
         </div>
       </section>
 
-      {/* 3. Lưới Responsive Danh mục (1 Cột iPhone, 2 Cột iPad, 3 Cột Desktop) */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-        {list.length === 0 ? (
-          <div className="col-span-full rounded-[26px] border border-dashed border-[#D8D6CC] bg-white p-8 text-center text-xs sm:text-sm font-bold text-[#8A8D7A]">
-            Chưa có phân loại nào cho mục này — Bấm "+ Thêm danh mục" để tạo nhé
+      {/* 3. Lưới Danh Mục (Responsive: 1 cột mobile, 2 cột tablet, 3 cột desktop) */}
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+        {isLoadingCat ? (
+          <div className="col-span-full text-center py-16 text-xs font-bold text-slate-400 space-y-2">
+            <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto" />
+            <p>Đang tải danh mục phân loại...</p>
+          </div>
+        ) : list.length === 0 ? (
+          <div className="col-span-full flex flex-col items-center justify-center rounded-[24px] border border-dashed border-slate-300 bg-white p-12 text-center space-y-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+              <FolderPlus className="h-6 w-6" />
+            </div>
+            <p className="text-sm font-bold text-slate-800">
+              Chưa có danh mục {tab === "expense" ? "chi tiêu" : "thu nhập"} nào
+            </p>
+            <p className="text-xs font-medium text-slate-400 max-w-xs">
+              Nhấn vào nút "+ Thêm danh mục" ở trên để khởi tạo danh mục đầu tiên nhé.
+            </p>
           </div>
         ) : (
           list.map((c) => {
@@ -127,7 +153,7 @@ function CategoriesPage() {
             return (
               <div
                 key={c.id}
-                className="rounded-[22px] bg-white border border-[#E7E5DC] p-4 shadow-sm hover:border-[#D8D6CC] transition-all space-y-3.5 flex flex-col justify-between"
+                className="rounded-[22px] bg-white border border-slate-200/80 p-4 shadow-sm hover:shadow-md hover:border-slate-300 transition-all space-y-3.5 flex flex-col justify-between"
               >
                 <div>
                   {/* Top: Icon + Name + Actions */}
@@ -139,7 +165,7 @@ function CategoriesPage() {
                       >
                         <Icon name={c.icon || "Tag"} className="h-5.5 w-5.5" />
                       </span>
-                      <p className="truncate text-sm sm:text-base font-extrabold text-[#16181D]">
+                      <p className="truncate text-sm sm:text-base font-extrabold text-slate-900">
                         {c.name}
                       </p>
                     </div>
@@ -152,7 +178,7 @@ function CategoriesPage() {
                           setEditing(c);
                           setOpen(true);
                         }}
-                        className="h-8 w-8 rounded-full text-[#8A8D7A] hover:text-[#16181D] hover:bg-[#F3F4F1]"
+                        className="h-8 w-8 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                         aria-label="Sửa"
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -161,26 +187,27 @@ function CategoriesPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDeleteCategory(c.id, c.name)}
-                        className="h-8 w-8 rounded-full text-[#8A8D7A] hover:text-[#EF5B45] hover:bg-[#FCE4E0]"
+                        className="h-8 w-8 rounded-xl text-slate-400 hover:text-[#EF5B45] hover:bg-rose-50 transition-colors"
                         aria-label="Xoá"
                       >
-                        <Trash2 className="h-3.5 w-3.5 text-[#EF5B45]" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
 
                   {/* Body: Danh sách Thẻ Ghi Chú Nhanh (Notes) */}
                   {catNotes.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5 pt-2 border-t border-[#F3F4F1]">
+                    <div className="mt-3.5 flex flex-wrap gap-1.5 pt-3 border-t border-slate-100">
                       {catNotes.map((n) => (
                         <span
                           key={n.id}
-                          className="inline-flex items-center gap-1.5 rounded-full bg-[#F3F4F1] border border-[#E7E5DC] px-2.5 py-1 text-xs font-semibold text-[#16181D] group transition-all"
+                          className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200/60 px-2.5 py-1 text-[11px] font-bold text-slate-700 transition-all hover:bg-slate-200/70"
                         >
+                          <TagIcon className="h-3 w-3 text-slate-400" />
                           {n.text}
                           <button
                             onClick={() => delNote.mutate(n.id)}
-                            className="text-[#8A8D7A] hover:text-[#EF5B45] transition-colors"
+                            className="text-slate-400 hover:text-[#EF5B45] transition-colors ml-0.5"
                             aria-label="Xoá ghi chú"
                           >
                             <X className="h-3 w-3" />
@@ -205,14 +232,14 @@ function CategoriesPage() {
                   <Input
                     value={noteDrafts[c.id] ?? ""}
                     maxLength={100}
-                    placeholder={`Thêm thẻ ví dụ: Cơm trưa...`}
+                    placeholder="Thêm thẻ ví dụ: Cơm trưa..."
                     onChange={(e) => setNoteDrafts((d) => ({ ...d, [c.id]: e.target.value }))}
-                    className="rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-[#16181D] text-xs font-medium h-9"
+                    className="rounded-xl border-slate-200 bg-[#F8F9FA] focus-visible:ring-[#109C7C] text-xs font-medium h-9 text-slate-900"
                   />
                   <Button
                     type="submit"
                     size="icon"
-                    className="h-9 w-9 shrink-0 rounded-xl bg-[#16181D] hover:bg-[#2A2E37] text-white"
+                    className="h-9 w-9 shrink-0 rounded-xl bg-slate-900 hover:bg-slate-800 text-white transition-all"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -260,24 +287,24 @@ function CategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md rounded-[26px] bg-white p-6 font-['Be_Vietnam_Pro'] border-[#E7E5DC]" key={key}>
+      <DialogContent className="sm:max-w-md rounded-[26px] bg-white p-6 font-['Be_Vietnam_Pro'] border-slate-200" key={key}>
         <DialogHeader>
-          <DialogTitle className="text-base font-extrabold text-[#16181D]">
-            {editing ? "Sửa phân loại" : "Tạo phân loại mới"}
+          <DialogTitle className="text-base font-extrabold text-slate-900">
+            {editing ? "Chỉnh sửa phân loại" : "Tạo phân loại mới"}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           {/* Chuyển loại Thu/Chi trong Modal */}
-          <div className="flex rounded-full bg-[#F3F4F1] p-1 border border-[#EDECE6]">
+          <div className="flex rounded-2xl bg-slate-100 p-1 border border-slate-200/60">
             <button
               type="button"
               onClick={() => setType("expense")}
               className={cn(
-                "flex-1 py-1.5 rounded-full text-xs font-bold transition-all",
+                "flex-1 py-1.5 rounded-xl text-xs font-bold transition-all",
                 type === "expense"
-                  ? "bg-[#16181D] text-white shadow-sm"
-                  : "text-[#8A8D7A]"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-900"
               )}
             >
               Chi tiêu
@@ -286,10 +313,10 @@ function CategoryDialog({
               type="button"
               onClick={() => setType("income")}
               className={cn(
-                "flex-1 py-1.5 rounded-full text-xs font-bold transition-all",
+                "flex-1 py-1.5 rounded-xl text-xs font-bold transition-all",
                 type === "income"
-                  ? "bg-[#16181D] text-white shadow-sm"
-                  : "text-[#8A8D7A]"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-900"
               )}
             >
               Thu nhập
@@ -297,7 +324,7 @@ function CategoryDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="c-name" className="text-xs font-bold text-[#16181D]">
+            <Label htmlFor="c-name" className="text-xs font-bold text-slate-900">
               Tên phân loại
             </Label>
             <Input
@@ -306,16 +333,16 @@ function CategoryDialog({
               maxLength={40}
               placeholder="Ăn uống, Lương hàng tháng, Giải trí..."
               onChange={(e) => setName(e.target.value)}
-              className="rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-[#16181D] font-medium text-xs sm:text-sm"
+              className="rounded-xl border-slate-200 bg-[#F8F9FA] focus-visible:ring-[#109C7C] font-medium text-xs sm:text-sm text-slate-900"
             />
           </div>
 
-          {/* Chọn Icon và Màu sắc đồng bộ */}
+          {/* Chọn Icon và Màu sắc */}
           <IconColorPicker icon={icon} color={color} setIcon={setIcon} setColor={setColor} />
         </div>
 
         <Button
-          className="w-full rounded-full bg-[#16181D] hover:bg-[#2A2E37] text-white font-bold py-2.5 h-auto transition-all mt-2"
+          className="w-full rounded-full bg-primary hover:bg-[#0E8A6E] text-white font-bold py-2.5 h-auto transition-all mt-2"
           onClick={async () => {
             if (!name.trim()) {
               toast.error("Vui lòng nhập tên phân loại");
@@ -329,7 +356,7 @@ function CategoryDialog({
                 icon,
                 color,
               });
-              toast.success("Đã lưu phân loại");
+              toast.success("Đã lưu phân loại thành công!");
               onOpenChange(false);
             } catch (e) {
               toast.error((e as Error).message);

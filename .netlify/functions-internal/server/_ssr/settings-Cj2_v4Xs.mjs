@@ -60,7 +60,7 @@ function SettingsPage() {
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
 				className: "flex items-center justify-between pb-3 border-b border-[#E3E2DC]",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-					className: "text-lg sm:text-xl font-extrabold tracking-tight text-[#16181D]",
+					className: "text-lg sm:text-xl font-extrabold tracking-tight text-primary",
 					children: "Cài đặt tài khoản"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-xs font-medium text-[#8A8D7A]",
@@ -74,10 +74,10 @@ function SettingsPage() {
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center gap-3 pb-3 border-b border-[#F3F4F1]",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#EAE8E0] text-[#16181D]",
+							className: "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#EAE8E0] text-primary",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, { className: "h-5 w-5" })
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-							className: "text-base font-extrabold text-[#16181D]",
+							className: "text-base font-extrabold text-primary",
 							children: "Hồ sơ cá nhân"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-xs font-semibold text-[#8A8D7A] font-['JetBrains_Mono'] truncate max-w-[200px] sm:max-w-xs",
@@ -90,7 +90,7 @@ function SettingsPage() {
 								className: "space-y-1.5",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
 									htmlFor: "dn",
-									className: "text-xs font-bold text-[#16181D]",
+									className: "text-xs font-bold text-primary",
 									children: "Tên hiển thị"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
 									id: "dn",
@@ -98,14 +98,14 @@ function SettingsPage() {
 									maxLength: 60,
 									placeholder: "Nhập tên người dùng",
 									onChange: (e) => setDisplayName(e.target.value),
-									className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-[#16181D] text-xs sm:text-sm font-medium h-10"
+									className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-primary text-xs sm:text-sm font-medium h-10"
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "space-y-1.5",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
 									htmlFor: "un",
-									className: "text-xs font-bold text-[#16181D]",
+									className: "text-xs font-bold text-primary",
 									children: "Tên đăng nhập (Username)"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
 									id: "un",
@@ -113,7 +113,7 @@ function SettingsPage() {
 									maxLength: 30,
 									placeholder: "vd: phuneng",
 									onChange: (e) => setUsername(e.target.value),
-									className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-[#16181D] font-['JetBrains_Mono'] text-xs sm:text-sm font-medium h-10"
+									className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-primary font-['JetBrains_Mono'] text-xs sm:text-sm font-medium h-10"
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
@@ -124,7 +124,7 @@ function SettingsPage() {
 									});
 									toast.success("Đã lưu thông tin cá nhân");
 								},
-								className: "w-full rounded-full bg-[#16181D] hover:bg-[#2A2E37] text-white font-bold text-xs sm:text-sm py-2.5 h-auto transition-all gap-1.5 shadow-sm mt-2",
+								className: "w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-white font-bold text-xs sm:text-sm py-2.5 h-auto transition-all gap-1.5 shadow-sm mt-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "h-4 w-4" }), " Lưu thay đổi"]
 							})
 						]
@@ -138,7 +138,7 @@ function SettingsPage() {
 								className: "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#FBEFD7] text-[#B4832B]",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: "h-5 w-5" })
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-								className: "text-base font-extrabold text-[#16181D]",
+								className: "text-base font-extrabold text-primary",
 								children: "Bảo mật & Mật khẩu"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-xs font-medium text-[#8A8D7A]",
@@ -153,7 +153,7 @@ function SettingsPage() {
 									className: "space-y-1.5",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
 										htmlFor: "pw",
-										className: "text-xs font-bold text-[#16181D]",
+										className: "text-xs font-bold text-primary",
 										children: "Mật khẩu mới"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
 										id: "pw",
@@ -161,14 +161,14 @@ function SettingsPage() {
 										placeholder: "Tối thiểu 6 ký tự",
 										value: password,
 										onChange: (e) => setPassword(e.target.value),
-										className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-[#16181D] text-xs sm:text-sm font-medium h-10"
+										className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-primary text-xs sm:text-sm font-medium h-10"
 									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "space-y-1.5",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
 										htmlFor: "pw2",
-										className: "text-xs font-bold text-[#16181D]",
+										className: "text-xs font-bold text-primary",
 										children: "Xác nhận mật khẩu mới"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
 										id: "pw2",
@@ -176,12 +176,12 @@ function SettingsPage() {
 										placeholder: "Nhập lại mật khẩu vừa gõ",
 										value: confirm,
 										onChange: (e) => setConfirm(e.target.value),
-										className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-[#16181D] text-xs sm:text-sm font-medium h-10"
+										className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-primary text-xs sm:text-sm font-medium h-10"
 									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 									type: "submit",
-									className: "w-full rounded-full bg-[#EAE8E0] hover:bg-[#E3E2DC] text-[#16181D] font-bold text-xs sm:text-sm py-2.5 h-auto transition-all mt-2",
+									className: "w-full rounded-full bg-[#EAE8E0] hover:bg-[#E3E2DC] text-primary font-bold text-xs sm:text-sm py-2.5 h-auto transition-all mt-2",
 									children: "Cập nhật mật khẩu"
 								})
 							]

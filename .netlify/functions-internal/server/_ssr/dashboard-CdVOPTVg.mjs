@@ -435,19 +435,19 @@ function Dashboard() {
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							onClick: () => step(-1),
-							className: "flex h-9 w-9 items-center justify-center rounded-full text-[#16181D] hover:bg-[#EAE9E3] active:scale-90 transition-all",
+							className: "flex h-9 w-9 items-center justify-center rounded-full text-primary hover:bg-[#EAE9E3] active:scale-90 transition-all",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "h-5 w-5" })
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "flex items-center gap-1.5 px-2 min-w-[140px] justify-center",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-								className: "text-base sm:text-lg font-extrabold tracking-tight text-[#16181D]",
+								className: "text-base sm:text-lg font-extrabold tracking-tight text-primary",
 								children: view === "month" ? format(cursor, "'Tháng' M, yyyy", { locale: vi }) : format(cursor, "dd/MM/yyyy", { locale: vi })
 							})
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							onClick: () => step(1),
-							className: "flex h-9 w-9 items-center justify-center rounded-full text-[#16181D] hover:bg-[#EAE9E3] active:scale-90 transition-all",
+							className: "flex h-9 w-9 items-center justify-center rounded-full text-primary hover:bg-[#EAE9E3] active:scale-90 transition-all",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "h-5 w-5" })
 						})
 					]
@@ -455,7 +455,7 @@ function Dashboard() {
 					className: "inline-flex rounded-full bg-[#EAE9E3] p-1",
 					children: ["day", "month"].map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: () => setView(v),
-						className: cn("rounded-full px-3.5 py-1 text-xs sm:text-sm font-bold transition-all", view === v ? "bg-[#16181D] text-white shadow-sm" : "text-[#6B7280] hover:text-[#16181D]"),
+						className: cn("rounded-full px-3.5 py-1 text-xs sm:text-sm font-bold transition-all", view === v ? "bg-primary text-primary-foreground text-white shadow-sm" : "text-[#6B7280] hover:text-primary"),
 						children: v === "day" ? "Ngày" : "Tháng"
 					}, v))
 				})]
@@ -473,7 +473,7 @@ function Dashboard() {
 									className: "flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#8A8D7A]",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Coins, { className: "h-4 w-4 text-[#D8A13B]" }), "Tổng tài sản"]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "mt-2 font-['JetBrains_Mono'] text-2xl sm:text-3xl font-bold leading-none tabular-nums text-[#16181D]",
+									className: "mt-2 font-['JetBrains_Mono'] text-2xl sm:text-3xl font-bold leading-none tabular-nums text-primary",
 									children: formatVND(totals.income)
 								})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FBEFD7] rotate-6",
@@ -494,9 +494,9 @@ function Dashboard() {
 									children: formatVND(totals.expense, { compact: true })
 								})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 									className: "flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#8A8D7A]",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Scale, { className: "h-3.5 w-3.5 text-[#109C7C]" }), "Còn lại"]
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Scale, { className: "h-3.5 w-3.5 text-primary" }), "Còn lại"]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: cn("mt-1 font-['JetBrains_Mono'] text-base sm:text-lg font-bold tabular-nums", totals.net >= 0 ? "text-[#109C7C]" : "text-[#EF5B45]"),
+									className: cn("mt-1 font-['JetBrains_Mono'] text-base sm:text-lg font-bold tabular-nums", totals.net >= 0 ? "text-primary" : "text-[#EF5B45]"),
 									children: formatVND(totals.net, { compact: true })
 								})] })]
 							})
@@ -525,10 +525,10 @@ function Dashboard() {
 									},
 									className: "flex h-12 sm:h-14 flex-col items-center justify-start gap-1 rounded-xl hover:bg-[#F3F4F1] transition-all active:scale-95 p-1",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: cn("flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full text-xs font-extrabold", isToday ? "bg-[#D8A13B] text-white" : "text-[#16181D]"),
+										className: cn("flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full text-xs font-extrabold", isToday ? "bg-[#D8A13B] text-white" : "text-primary"),
 										children: d.getDate()
 									}), entry ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-										className: cn("font-['JetBrains_Mono'] text-[9px] sm:text-[10px] font-bold tabular-nums leading-none", net >= 0 ? "text-[#109C7C]" : "text-[#EF5B45]"),
+										className: cn("font-['JetBrains_Mono'] text-[9px] sm:text-[10px] font-bold tabular-nums leading-none", net >= 0 ? "text-primary" : "text-[#EF5B45]"),
 										children: [net >= 0 ? "+" : "-", formatVND(Math.abs(net), { compact: true })]
 									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-[9px]" })]
 								}, key);
@@ -560,7 +560,7 @@ function Dashboard() {
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "min-w-0 flex-1",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-											className: "truncate text-sm font-bold text-[#16181D]",
+											className: "truncate text-sm font-bold text-primary",
 											children: c?.name ?? "Khác"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 											className: "truncate text-xs font-medium text-[#8A8D7A]",
@@ -571,7 +571,7 @@ function Dashboard() {
 									className: "flex items-center gap-2 shrink-0",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: cn("font-['JetBrains_Mono'] text-sm font-bold tabular-nums", t.type === "income" ? "text-[#109C7C]" : "text-[#EF5B45]"),
+											className: cn("font-['JetBrains_Mono'] text-sm font-bold tabular-nums", t.type === "income" ? "text-primary" : "text-[#EF5B45]"),
 											children: [t.type === "income" ? "+" : "-", formatVND(t.amount)]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
@@ -581,7 +581,7 @@ function Dashboard() {
 												setEditing(t);
 												setDialogOpen(true);
 											},
-											className: "h-8 w-8 rounded-full text-[#8A8D7A] hover:text-[#16181D] hover:bg-[#F3F4F1]",
+											className: "h-8 w-8 rounded-full text-[#8A8D7A] hover:text-primary hover:bg-[#F3F4F1]",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "h-3.5 w-3.5" })
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
@@ -603,11 +603,11 @@ function Dashboard() {
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center justify-between px-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
-								className: "text-sm font-extrabold text-[#16181D] flex items-center gap-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wallet, { className: "h-4 w-4 text-[#109C7C]" }), "Ví của bạn"]
+								className: "text-sm font-extrabold text-primary flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wallet, { className: "h-4 w-4 text-primary" }), "Ví của bạn"]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
 								to: "/summary",
-								className: "text-xs font-bold text-[#8A8D7A] hover:text-[#16181D] flex items-center gap-0.5",
+								className: "text-xs font-bold text-[#8A8D7A] hover:text-primary flex items-center gap-0.5",
 								children: ["Chi tiết ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "h-3.5 w-3.5" })]
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -617,21 +617,21 @@ function Dashboard() {
 								children: "Chưa có ví nào trong tài khoản"
 							}) : wallets.map((w) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								onClick: () => navigate({ to: "/summary" }),
-								className: "flex items-center justify-between rounded-[20px] bg-white border border-[#E7E5DC] p-3.5 shadow-sm active:scale-[0.99] transition-all cursor-pointer hover:border-[#109C7C]/40",
+								className: "flex items-center justify-between rounded-[20px] bg-white border border-[#E7E5DC] p-3.5 shadow-sm active:scale-[0.99] transition-all cursor-pointer hover:border-primary/40",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-center gap-3",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "flex h-9 w-9 items-center justify-center rounded-xl bg-[#109C7C]/10 text-[#109C7C]",
+										className: "flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wallet, { className: "h-4.5 w-4.5" })
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs font-extrabold text-[#16181D]",
+										className: "text-xs font-extrabold text-primary",
 										children: w.name
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "text-[10.5px] font-medium text-[#8A8D7A]",
 										children: w.currency || "VND"
 									})] })]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "font-['JetBrains_Mono'] text-xs font-bold text-[#16181D]",
+									className: "font-['JetBrains_Mono'] text-xs font-bold text-primary",
 									children: formatVND(w.initial_balance ?? 0)
 								})]
 							}, w.id))
@@ -641,11 +641,11 @@ function Dashboard() {
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center justify-between px-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
-								className: "text-sm font-extrabold text-[#16181D] flex items-center gap-2",
+								className: "text-sm font-extrabold text-primary flex items-center gap-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PiggyBank, { className: "h-4 w-4 text-[#D8A13B]" }), "Quỹ tiết kiệm"]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
 								to: "/budgets",
-								className: "text-xs font-bold text-[#8A8D7A] hover:text-[#16181D] flex items-center gap-0.5",
+								className: "text-xs font-bold text-[#8A8D7A] hover:text-primary flex items-center gap-0.5",
 								children: ["Quản lý ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "h-3.5 w-3.5" })]
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -667,7 +667,7 @@ function Dashboard() {
 												style: { backgroundColor: `${f.color}15` },
 												children: f.icon
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-												className: "text-xs font-extrabold text-[#16181D]",
+												className: "text-xs font-extrabold text-primary",
 												children: f.name
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 												className: "text-[10.5px] font-medium text-[#8A8D7A]",
@@ -676,7 +676,7 @@ function Dashboard() {
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 											className: "text-right",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-												className: "font-['JetBrains_Mono'] text-xs font-bold text-[#16181D]",
+												className: "font-['JetBrains_Mono'] text-xs font-bold text-primary",
 												children: formatVND(f.currentAmount)
 											}), f.targetAmount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 												className: "text-[10px] font-bold text-[#8A8D7A]",
@@ -705,7 +705,7 @@ function Dashboard() {
 					setEditing(null);
 					setDialogOpen(true);
 				},
-				className: "fixed bottom-24 right-6 md:bottom-8 md:right-8 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-[#16181D] text-white shadow-[0_8px_24px_rgba(22,24,29,0.3)] hover:scale-105 active:scale-90 transition-all",
+				className: "fixed bottom-24 right-6 md:bottom-8 md:right-8 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground text-white shadow-[0_8px_24px_rgba(22,24,29,0.3)] hover:scale-105 active:scale-90 transition-all",
 				"aria-label": "Thêm giao dịch",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "h-6 w-6" })
 			}),

@@ -63,18 +63,15 @@ export function Icon({ name, className }: { name: string; className?: string }) 
   const Cmp = ICONS[name] ?? Tag;
   return <Cmp className={className} />;
 }
-
 export const PALETTE = [
-  "#22c55e",
-  "#14b8a6",
-  "#0ea5e9",
-  "#6366f1",
-  "#a855f7",
-  "#ec4899",
-  "#ef4444",
-  "#f97316",
-  "#eab308",
-  "#84cc16",
-  "#06b6d4",
-  "#64748b",
+  "#EC4899", // 🩷 Hồng (Pink)
+  "#EF5B45", // ❤️ Đỏ / Coral
+  "#F43F5E", // 🌹 Hồng đỏ / Rose
+  "#3B82F6", // 💙 Xanh biển (Blue)
+  "#0EA5E9", // 🩵 Xanh da trời (Sky)
+  "#8B5CF6", // 💜 Tím (Purple)
+  "#109C7C", // 💚 Xanh lá mint (Teal)
+  "#22C55E", // 🟢 Xanh lá tươi
+  "#F59E0B", // 💛 Cam vàng (Amber)
+  "#64748B", // 🩶 Xám (Slate)
 ];

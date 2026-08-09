@@ -33,7 +33,7 @@ function CategoriesPage() {
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 				className: "flex items-center justify-between pb-3 border-b border-[#E3E2DC]",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-					className: "text-lg sm:text-xl font-extrabold tracking-tight text-[#16181D]",
+					className: "text-lg sm:text-xl font-extrabold tracking-tight text-primary",
 					children: "Phân loại thu chi"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-xs font-medium text-[#8A8D7A]",
@@ -43,7 +43,7 @@ function CategoriesPage() {
 						setEditing(null);
 						setOpen(true);
 					},
-					className: "rounded-full bg-[#16181D] hover:bg-[#2A2E37] text-white font-bold text-xs sm:text-sm px-4 py-2 h-auto shadow-sm transition-all",
+					className: "rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-white font-bold text-xs sm:text-sm px-4 py-2 h-auto shadow-sm transition-all",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "mr-1.5 h-4 w-4" }), " Thêm danh mục"]
 				})]
 			}),
@@ -53,12 +53,12 @@ function CategoriesPage() {
 					className: "flex w-full sm:w-auto p-1 bg-[#EAE8E0] rounded-full border border-[#E3E2DC]",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: () => setTab("expense"),
-						className: cn("flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-6 py-2 rounded-full text-xs sm:text-sm font-bold transition-all", tab === "expense" ? "bg-[#16181D] text-white shadow-sm" : "text-[#8A8D7A] hover:text-[#16181D]"),
+						className: cn("flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-6 py-2 rounded-full text-xs sm:text-sm font-bold transition-all", tab === "expense" ? "bg-primary text-primary-foreground text-white shadow-sm" : "text-[#8A8D7A] hover:text-primary"),
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpRight, { className: cn("h-4 w-4", tab === "expense" ? "text-[#EF5B45]" : "") }), "Khoản chi tiêu"]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: () => setTab("income"),
-						className: cn("flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-6 py-2 rounded-full text-xs sm:text-sm font-bold transition-all", tab === "income" ? "bg-[#16181D] text-white shadow-sm" : "text-[#8A8D7A] hover:text-[#16181D]"),
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDownLeft, { className: cn("h-4 w-4", tab === "income" ? "text-[#109C7C]" : "") }), "Khoản thu nhập"]
+						className: cn("flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-6 py-2 rounded-full text-xs sm:text-sm font-bold transition-all", tab === "income" ? "bg-primary text-primary-foreground text-white shadow-sm" : "text-[#8A8D7A] hover:text-primary"),
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDownLeft, { className: cn("h-4 w-4", tab === "income" ? "text-primary" : "") }), "Khoản thu nhập"]
 					})]
 				})
 			}),
@@ -83,7 +83,7 @@ function CategoriesPage() {
 										className: "h-5.5 w-5.5"
 									})
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "truncate text-sm sm:text-base font-extrabold text-[#16181D]",
+									className: "truncate text-sm sm:text-base font-extrabold text-primary",
 									children: c.name
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -95,7 +95,7 @@ function CategoriesPage() {
 										setEditing(c);
 										setOpen(true);
 									},
-									className: "h-8 w-8 rounded-full text-[#8A8D7A] hover:text-[#16181D] hover:bg-[#F3F4F1]",
+									className: "h-8 w-8 rounded-full text-[#8A8D7A] hover:text-primary hover:bg-[#F3F4F1]",
 									"aria-label": "Sửa",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "h-3.5 w-3.5" })
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
@@ -110,7 +110,7 @@ function CategoriesPage() {
 						}), catNotes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "mt-3 flex flex-wrap gap-1.5 pt-2 border-t border-[#F3F4F1]",
 							children: catNotes.map((n) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "inline-flex items-center gap-1.5 rounded-full bg-[#F3F4F1] border border-[#E7E5DC] px-2.5 py-1 text-xs font-semibold text-[#16181D] group transition-all",
+								className: "inline-flex items-center gap-1.5 rounded-full bg-[#F3F4F1] border border-[#E7E5DC] px-2.5 py-1 text-xs font-semibold text-primary group transition-all",
 								children: [n.text, /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 									onClick: () => delNote.mutate(n.id),
 									className: "text-[#8A8D7A] hover:text-[#EF5B45] transition-colors",
@@ -141,11 +141,11 @@ function CategoriesPage() {
 									...d,
 									[c.id]: e.target.value
 								})),
-								className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-[#16181D] text-xs font-medium h-9"
+								className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-primary text-xs font-medium h-9"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 								type: "submit",
 								size: "icon",
-								className: "h-9 w-9 shrink-0 rounded-xl bg-[#16181D] hover:bg-[#2A2E37] text-white",
+								className: "h-9 w-9 shrink-0 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-white",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "h-4 w-4" })
 							})]
 						})]
@@ -184,7 +184,7 @@ function CategoryDialog({ open, onOpenChange, editing, defaultType }) {
 			className: "sm:max-w-md rounded-[26px] bg-white p-6 font-['Be_Vietnam_Pro'] border-[#E7E5DC]",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, {
-					className: "text-base font-extrabold text-[#16181D]",
+					className: "text-base font-extrabold text-primary",
 					children: editing ? "Sửa phân loại" : "Tạo phân loại mới"
 				}) }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -195,12 +195,12 @@ function CategoryDialog({ open, onOpenChange, editing, defaultType }) {
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "button",
 								onClick: () => setType("expense"),
-								className: cn("flex-1 py-1.5 rounded-full text-xs font-bold transition-all", type === "expense" ? "bg-[#16181D] text-white shadow-sm" : "text-[#8A8D7A]"),
+								className: cn("flex-1 py-1.5 rounded-full text-xs font-bold transition-all", type === "expense" ? "bg-primary text-primary-foreground text-white shadow-sm" : "text-[#8A8D7A]"),
 								children: "Chi tiêu"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "button",
 								onClick: () => setType("income"),
-								className: cn("flex-1 py-1.5 rounded-full text-xs font-bold transition-all", type === "income" ? "bg-[#16181D] text-white shadow-sm" : "text-[#8A8D7A]"),
+								className: cn("flex-1 py-1.5 rounded-full text-xs font-bold transition-all", type === "income" ? "bg-primary text-primary-foreground text-white shadow-sm" : "text-[#8A8D7A]"),
 								children: "Thu nhập"
 							})]
 						}),
@@ -208,7 +208,7 @@ function CategoryDialog({ open, onOpenChange, editing, defaultType }) {
 							className: "space-y-1.5",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
 								htmlFor: "c-name",
-								className: "text-xs font-bold text-[#16181D]",
+								className: "text-xs font-bold text-primary",
 								children: "Tên phân loại"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
 								id: "c-name",
@@ -216,7 +216,7 @@ function CategoryDialog({ open, onOpenChange, editing, defaultType }) {
 								maxLength: 40,
 								placeholder: "Ăn uống, Lương hàng tháng, Giải trí...",
 								onChange: (e) => setName(e.target.value),
-								className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-[#16181D] font-medium text-xs sm:text-sm"
+								className: "rounded-xl border-[#EDECE6] bg-[#F3F4F1] focus-visible:ring-primary font-medium text-xs sm:text-sm"
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconColorPicker, {
@@ -228,7 +228,7 @@ function CategoryDialog({ open, onOpenChange, editing, defaultType }) {
 					]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-					className: "w-full rounded-full bg-[#16181D] hover:bg-[#2A2E37] text-white font-bold py-2.5 h-auto transition-all mt-2",
+					className: "w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-white font-bold py-2.5 h-auto transition-all mt-2",
 					onClick: async () => {
 						if (!name.trim()) {
 							toast.error("Vui lòng nhập tên phân loại");
